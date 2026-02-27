@@ -1,9 +1,13 @@
+<?php
+    include 'Public/includes/header.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seguros el Lic</title>
+    <title>Aseguradora el Lic</title>
 </head>
 <body>
     
