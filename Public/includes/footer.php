@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aseguradora el Lic</title>
-    <link rel="stylesheet" href="assets/style/footer.css">    
+    <link rel="stylesheet" href="/Public/assets/style/footer.css">    
 </head>
 <body>
     
+    
+</body>
 <footer>
     <p>Mauricio E. Ortiz Rdz. </p><br>
     <p>Josué Rolando Carreón Guadián</p><br>
     <p>Proyecto Final - Aseguradora el Lic</p>
 </footer>
-
-</body>
 </html>

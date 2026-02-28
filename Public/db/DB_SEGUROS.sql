@@ -3,6 +3,13 @@ CREATE DATABASE seguros_db;
 USE seguros_db;
 
 -- ================================================== --
+-- Autor: Mauricio Eleuterio Ortiz Roddriguez         --
+-- Fecha_Inicio: 25/02/2026                           --
+-- Fecha_Modificación: 27/02/2026                     --
+-- Descripcion:####                                   --
+-- ================================================== --
+
+-- ================================================== --
 --                      USUARIO                       --
 -- ================================================== --
 CREATE TABLE Persona(
