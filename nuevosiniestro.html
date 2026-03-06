@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoGest Seguros - Nuevo Siniestro</title>
+    <link rel="stylesheet" href="nuevosiniestro.css">
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo">
+            <h1>AutoGest Seguros</h1>
+            <span>Registro de Nuevo Siniestro</span>
+        </div>
+        <div class="user-menu">
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name" id="userNameDisplay">Juan Pérez</div>
+                    <div class="user-role" id="userRoleDisplay">Ajustador</div>
+                </div>
+                <div class="avatar" id="userAvatar">JP</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="container">
+        <!-- Barra de progreso -->
+        <div class="progress-bar-container">
+            <div class="progress-steps">
+                <div class="step active" id="step1">
+                    1
+                    <span class="step-label">Datos Básicos</span>
+                </div>
+                <div class="step" id="step2">
+                    2
+                    <span class="step-label">Vehículo y Seguro</span>
+                </div>
+                <div class="step" id="step3">
+                    3
+                    <span class="step-label">Detalles del Siniestro</span>
+                </div>
+                <div class="step" id="step4">
+                    4
+                    <span class="step-label">Evidencia Multimedia</span>
+                </div>
+                <div class="step" id="step5">
+                    5
+                    <span class="step-label">Revisión</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario principal -->
+        <div class="form-container">
+            <div class="form-header">
+                <h2>
+                    <i>➕</i>
+                    Registrar Nuevo Siniestro
+                </h2>
+                <span class="badge" style="background: #f0f0f0; padding: 0.5rem 1rem; border-radius: 40px; color: #666;">
+                    Folio: <strong>SN-2024-{nuevo}</strong>
+                </span>
+            </div>
+
+            <!-- PASO 1: DATOS BÁSICOS -->
+            <div class="form-section" id="paso1">
+                <h3>
+                    <i>📋</i>
+                    Paso 1: Datos Básicos del Cliente
+                </h3>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tipo de Cliente <span class="required">*</span></label>
+                        <select id="tipoCliente" onchange="toggleClienteFields()">
+                            <option value="persona">Persona Física</option>
+                            <option value="moral">Persona Moral</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="campoNombre">
+                        <label>Nombre completo <span class="required">*</span></label>
+                        <input type="text" id="nombreCliente" placeholder="Ej: Juan Pérez García">
+                    </div>
+
+                    <div class="form-group" id="campoRazonSocial" style="display: none;">
+                        <label>Razón Social <span class="required">*</span></label>
+                        <input type="text" id="razonSocial" placeholder="Ej: Empresa S.A. de C.V.">
+                    </div>
+
+                    <div class="form-group">
+                        <label>RFC <span class="required">*</span></label>
+                        <input type="text" id="rfc" placeholder="XXXX000000XXX">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Teléfono <span class="required">*</span></label>
+                        <input type="tel" id="telefono" placeholder="55 1234 5678">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email <span class="required">*</span></label>
+                        <input type="email" id="email" placeholder="cliente@email.com">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Dirección <span class="required">*</span></label>
+                        <input type="text" id="direccion" placeholder="Calle, número, colonia, ciudad, estado">
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 2: VEHÍCULO Y SEGURO -->
+            <div class="form-section" id="paso2" style="display: none;">
+                <h3>
+                    <i>🚗</i>
+                    Paso 2: Datos del Vehículo y Seguro
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Compañía de Seguros <span class="required">*</span></label>
+                        <select id="companiaSeguros">
+                            <option value="">Seleccionar compañía</option>
+                            <option value="seguros mx">Seguros MX</option>
+                            <option value="aseguradora total">Aseguradora Total</option>
+                            <option value="proteccion aseguradora">Protección Aseguradora</option>
+                            <option value="seguros nacional">Seguros Nacional</option>
+                            <option value="otra">Otra (especificar)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Número de Póliza <span class="required">*</span></label>
+                        <input type="text" id="numPoliza" placeholder="Ej: POL-2024-12345">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Marca <span class="required">*</span></label>
+                        <input type="text" id="marca" placeholder="Ej: Toyota">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Modelo <span class="required">*</span></label>
+                        <input type="text" id="modelo" placeholder="Ej: Corolla">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Año <span class="required">*</span></label>
+                        <select id="anio">
+                            <option value="">Seleccionar año</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <option value="2020">2020</option>
+                            <!-- Agregar más años según necesidad -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Placas <span class="required">*</span></label>
+                        <input type="text" id="placas" placeholder="Ej: ABC-123">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Número de Serie (VIN) <span class="required">*</span></label>
+                        <input type="text" id="serie" placeholder="Ej: 3N1CE2CK8ML123456">
+                        <div class="field-hint">17 caracteres alfanuméricos</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Color</label>
+                        <input type="text" id="color" placeholder="Ej: Rojo">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Combustible</label>
+                        <select id="combustible">
+                            <option value="gasolina">Gasolina</option>
+                            <option value="diesel">Diesel</option>
+                            <option value="hibrido">Híbrido</option>
+                            <option value="electrico">Eléctrico</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Kilometraje</label>
+                        <input type="number" id="kilometraje" placeholder="Ej: 15000">
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 3: DETALLES DEL SINIESTRO -->
+            <div class="form-section" id="paso3" style="display: none;">
+                <h3>
+                    <i>📍</i>
+                    Paso 3: Detalles del Siniestro
+                </h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Fecha y hora del siniestro <span class="required">*</span></label>
+                        <input type="datetime-local" id="fechaSiniestro">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de siniestro <span class="required">*</span></label>
+                        <select id="tipoSiniestro">
+                            <option value="">Seleccionar tipo</option>
+                            <option value="choque">Choque</option>
+                            <option value="volcadura">Volcadura</option>
+                            <option value="incendio">Incendio</option>
+                            <option value="robo">Robo</option>
+                            <option value="impacto">Impacto contra objeto fijo</option>
+                            <option value="fenomeno">Fenómeno natural</option>
+                            <option value="vandalismo">Vandalismo</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Ubicación del siniestro <span class="required">*</span></label>
+                        <div class="location-picker">
+                            <input type="text" id="ubicacion" placeholder="Calle, número, colonia, ciudad, estado, referencias">
+                            <button class="btn-location" onclick="obtenerUbicacionActual()">
+                                <span>📍</span> Ubicación actual
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Descripción del asegurado <span class="required">*</span></label>
+                        <textarea id="descripcion" placeholder="Describa detalladamente lo sucedido según el asegurado..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>¿Hubo otras unidades involucradas?</label>
+                        <select id="otrasUnidades" onchange="toggleOtrasUnidades()">
+                            <option value="no">No</option>
+                            <option value="si">Sí</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>¿Hubo lesionados?</label>
+                        <select id="lesionados">
+                            <option value="no">No</option>
+                            <option value="si">Sí</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>¿Hubo autoridades presentes?</label>
+                        <select id="autoridades">
+                            <option value="no">No</option>
+                            <option value="policia">Policía</option>
+                            <option value="transito">Tránsito</option>
+                            <option value="fiscalia">Fiscalía</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Sección de otras unidades involucradas (dinámica) -->
+                <div id="otrasUnidadesContainer" style="display: none;">
+                    <h4 style="color: #003366; margin: 1rem 0;">Vehículos involucrados</h4>
+                    <div id="vehiculosList"></div>
+                    <button class="btn-add-vehicle" onclick="agregarVehiculo()">
+                        <span>➕</span> Agregar otro vehículo
+                    </button>
+                </div>
+            </div>
+
+            <!-- PASO 4: EVIDENCIA MULTIMEDIA -->
+            <div class="form-section" id="paso4" style="display: none;">
+                <h3>
+                    <i>📸</i>
+                    Paso 4: Evidencia Multimedia
+                </h3>
+
+                <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+                    <i>📁</i>
+                    <span>Haz clic para subir archivos o arrastra y suelta aquí</span>
+                    <small>Formatos soportados: JPG, PNG, MP4, MOV (Max 50MB por archivo)</small>
+                </div>
+                <input type="file" id="fileInput" multiple accept="image/*,video/*" style="display: none;" onchange="handleFileSelect(event)">
+
+                <div class="file-list" id="fileList"></div>
+
+                <div style="margin-top: 1rem; padding: 1rem; background: #e8f0fe; border-radius: 12px;">
+                    <h4 style="color: #003366; margin-bottom: 0.5rem;">Recomendaciones para la evidencia:</h4>
+                    <ul style="margin-left: 1.5rem; color: #666;">
+                        <li>Toma fotos de los daños desde diferentes ángulos</li>
+                        <li>Incluye fotos de las placas del vehículo</li>
+                        <li>Fotografía el lugar del siniestro</li>
+                        <li>Si hay otros vehículos, captura sus placas y daños</li>
+                        <li>Videos cortos del contexto general</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PASO 5: REVISIÓN FINAL -->
+            <div class="form-section" id="paso5" style="display: none;">
+                <h3>
+                    <i>✓</i>
+                    Paso 5: Revisión Final
+                </h3>
+
+                <div style="background: #e8f5e8; border-radius: 15px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h4 style="color: #2e7d32; margin-bottom: 0.5rem;">✅ Antes de enviar, verifica:</h4>
+                    <ul style="margin-left: 1.5rem; color: #1e4620;">
+                        <li>Todos los campos obligatorios están completos</li>
+                        <li>Los datos del cliente son correctos</li>
+                        <li>La información del vehículo coincide con la póliza</li>
+                        <li>La descripción del siniestro es clara y detallada</li>
+                        <li>Se han subido todas las fotos necesarias</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="terminos" onchange="toggleSubmitButton()">
+                        <span>Confirmo que la información proporcionada es verídica y completa <span class="required">*</span></span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="notificar">
+                        <span>Notificar al cliente por email sobre el registro del siniestro</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Botones de navegación -->
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="btnAnterior" onclick="cambiarPaso('anterior')" style="display: none;">
+                    <span>←</span> Anterior
+                </button>
+                <button class="btn btn-primary" id="btnSiguiente" onclick="cambiarPaso('siguiente')">
+                    Siguiente <span>→</span>
+                </button>
+                <button class="btn btn-success" id="btnEnviar" onclick="enviarSiniestro()" style="display: none;">
+                    <span>✓</span> Registrar Siniestro
+                </button>
+                <button class="btn btn-secondary" onclick="cancelarRegistro()">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <h3>✅ Siniestro Registrado</h3>
+            <p>El siniestro ha sido registrado exitosamente con el folio <strong id="folioGenerado">SN-2024-0124</strong></p>
+            <p>Se ha notificado al ajustador y al supervisor para su revisión.</p>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="verDetalle()">Ver Detalle</button>
+                <button class="btn btn-secondary" onclick="nuevoRegistro()">Registrar Otro</button>
+                <button class="btn btn-secondary" onclick="irDashboard()">Ir al Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="nuevosiniestro.js"></script>
+    
+</body>
+</html>
