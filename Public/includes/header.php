@@ -1,23 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aseguradora el Lic</title>
-    <link rel="stylesheet" href="/Public/assets/style/header.css">
-</head>
-<body>
-
-<header>
-    <div class="logo">
-        <img src="#" alt="Logo de Aseguradora el Lic" href="index.php">
-    </div>
-    <nav>
-        <ul>
-            <li><a href="index.php">Inicio</a></li>
-        </ul>
-    </nav>
+<header class="header">
+        <div class="logo">
+            <h1>AutoGest Seguros</h1>
+            <span>Sistema de Gestión de Siniestros</span>
+        </div>
+        <div class="user-menu">
+            <div class="notifications" onclick="showNotifications()">
+                <span>🔔</span>
+            </div>
+            <div class="user-info" onclick="toggleUserMenu()">
+                <div class="user-details">
+                    <div class="user-name" id="userNameDisplay">Juan Pérez</div>
+                    <div class="user-role" id="userRoleDisplay">Supervisor</div>
+                </div>
+                <div class="avatar" id="userAvatar">JP</div>
+            </div>
+        </div>
 </header>
-
-</body>
-</html>

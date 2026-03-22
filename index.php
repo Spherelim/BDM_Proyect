@@ -1,30 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aseguradora el Lic</title>
-    <link rel="stylesheet" href="/Public/assets/style/index.css"></link>
+    <title>AutoGest Seguros - Sistema de Gestión de Siniestros</title>
+    <link rel="stylesheet" href="Public/assets/style/dashboard.css">
 </head>
 <body>
-    <?php
-        include 'Public/includes/header.php';
-        include 'Public/classes/Usuario.php';
-    ?>
+
+    <!-- HEADER incluida -->
+    <?php include 'Public/includes/header.php' ?>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <?php include 'Public/includes/index_Container.php' ?>
+
+    <!-- MODAL DE DETALLE DE SINIESTRO -->
+    <?php include 'Public/includes/Modal_Siniestro.php' ?>
+
+    <!-- script con la funciones -->
+    <script src="Public/assets/js/dashboard.js"></script>
     
-    <!-- <a href="youtube.com"><#?php echo"Pagina principal"?></a> -->
-
-    <h1>
-
-        <?php 
-        $my_Class = new Usuario("Mauricio","Ortiz","12/06/2004","fotoxd","Masculino","XD");
-        
-        $my_Class->MostrarDatos();
-        ?>
-    </h1>
-
-    <?php
-        include 'Public/includes/footer.php'
-    ?>
 </body>
 </html>
