@@ -824,8 +824,8 @@
             alert('Mostrando notificaciones');
         }
 
-        function toggleUserMenu() {
-            alert('Menú de usuario');
+        function goToLogin(){
+            window.location.href = "Public/views/Login.php";
         }
 
         // Inicializar al cargar la página
