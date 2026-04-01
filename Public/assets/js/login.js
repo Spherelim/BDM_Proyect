@@ -185,7 +185,6 @@
         // Manejar registro
         function handleRegister() {
             if (document.getElementById('registerBtn').disabled) return;
-            
             const userData = {
                 tipo: selectedUserType,
                 nombre: document.getElementById('regNombre').value,
@@ -196,6 +195,27 @@
                 alias: document.getElementById('regAlias').value,
                 password: document.getElementById('regPassword').value
             };
+            // ===========================================================
+
+            fetch("/BDM/Public/api/register.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.ok){
+                    alert("✅ Registro exitoso");
+                    switchTab('login');
+                } else {
+                    alert("❌ " + data.mensaje);
+                }
+            });
+
+            // ===========================================================
+
             
             console.log('Registrando usuario:', userData);
             alert(`✅ Registro exitoso como ${selectedUserType}!\nBienvenido ${userData.alias}`);

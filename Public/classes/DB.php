@@ -24,13 +24,12 @@
         // Para usar los SP
         public function callSP($sp,$params=[]){
             $placeholders = implode(',',array_fill(0,count($params),'?'));
-            $sql = "CALL $sp($placeholdders)";
+            $sql = "CALL $sp($placeholders)";
 
             $stmt = $this->conn->prepare($sql);
             $stmt->execute(array_values($params));
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+            $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $stmt->closeCursor();
 
             if(count($resultados) > 0 && isset($resultados[0]['Mensaje'])){
@@ -44,12 +43,13 @@
                 "ok" => true,
                 "data"=>$resultados
             ];
+
         }
 
         // Por si se requiere usar las FN
         public function callFN($fn,$params=[]){
             $placeholders = implode(',',array_fill(0,count($params),'?'));
-            $sql = "SELECT $fn($placeholdders) AS resultado";
+            $sql = "SELECT $fn($placeholders) AS resultado";
 
             $stmt = $this->conn->prepare($sql);
             $stmt->execute(array_values($params));

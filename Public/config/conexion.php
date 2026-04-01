@@ -1,9 +1,9 @@
 <?php
 
 class Conexion{
-    private static $host = "";
-    private static $db = "";
-    private static $user = "";
+    private static $host = "localhost";
+    private static $db = "bdm_seguros";
+    private static $user = "root";
     private static $pass = "";
 
     private static $conexion = null;
