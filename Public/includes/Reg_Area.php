@@ -79,10 +79,10 @@
                             <input type="text" id="regAlias" placeholder="Cómo quieres ser llamado">
                         </div>
                     </div>
-
+                    
                     <!-- Contraseña con medidor de seguridad -->
                     <div class="form-group">
-                        <label>Contraseña <span class="required">*</span></label>
+                        <label>Contraseña<span class="required">*</span></label>
                         <input type="password" id="regPassword" placeholder="Crea una contraseña segura" oninput="checkPasswordStrength()">
                         
                         <!-- Medidor de fortaleza -->
@@ -109,12 +109,12 @@
                             </div>
                         </div>
                     </div>
-
+                    
                     <div class="form-group">
                         <label>Confirmar contraseña <span class="required">*</span></label>
                         <input type="password" id="regConfirmPassword" placeholder="Repite tu contraseña" oninput="validatePasswordMatch()">
                     </div>
-
+                    
                     <!-- Verificación de edad -->
                     <div class="age-verification">
                         <input type="checkbox" id="ageVerification" onchange="toggleRegisterButton()">

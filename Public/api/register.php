@@ -1,21 +1,31 @@
 <?php
-require_once "../../clases/DB.php";
+require_once __DIR__ . "/../../classes/Usuario.php";
+require_once "../../classes/DB.php";
 
-header("Content-Type: application/json");
+$ruta = __DIR__ . "/../../classes/Usuario.php";
 
-$data = json_decode(file_get_contents("php://input"), true);
+echo "Ruta: " . $ruta . "<br>";
 
-$db = new DB();
+if(file_exists($ruta)){
+    echo "✅ SI EXISTE";
+}else{
+    echo "❌ NO EXISTE";
+}
 
-$res = $db->callSP("sp_GestionUsuario", [
-    1,
-    null,
-    $data['nombre'],
-    $data['apellidos'],
-    $data['email'],
-    $data['alias'],
-    $data['password'],
-    $data['tipo']
-]);
+exit;
 
-echo json_encode($res);
+$usuario = new Usuario();
+$res = $usuario->registrar($data);
+
+var_dump($res);
+exit;
+try{
+    echo json_encode($res);    
+} catch(Throwable $e){
+    echo json_encode([
+        "ok" => false,
+        "mensaje" => $e->getMessage()
+    ]);
+}
+
+?>

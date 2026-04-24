@@ -1,4 +1,5 @@
 <?php 
+require_once __DIR__ . "/DB.php";
 
 class Usuario{
     private $db;
@@ -8,6 +9,17 @@ class Usuario{
     }
 
     public function registrar($data){
+
+        $genero = $data['genero'] == "masculino" ? 1 : 0;
+
+        $roles = [
+            "ajustador" => 1,
+            "supervisor" => 2,
+            "asegurador" => 3
+        ];
+
+        $idRol = $roles[$data['tipo']] ?? null;
+
         $resPersona = $this->db->callSP("sp_GestionPersona",[
             1,
             null,
@@ -16,7 +28,7 @@ class Usuario{
             $data['alias'],
             $data['fechaNacimiento'],
             null,
-            $data['genero']
+            $genero
         ]);
 
         if(!$resPersona["ok"]) return $resPersona;
@@ -28,7 +40,7 @@ class Usuario{
             null,
             $data['email'],
             password_hash($data['password'],PASSWORD_DEFAULT),
-            $data['rol'],
+            $idRol,
             $idPersona
         ]);
 

@@ -1,4 +1,3 @@
-
         // Variables globales
         let selectedUserType = '';
         let isPasswordValid = false;
@@ -185,6 +184,7 @@
         // Manejar registro
         function handleRegister() {
             if (document.getElementById('registerBtn').disabled) return;
+
             const userData = {
                 tipo: selectedUserType,
                 nombre: document.getElementById('regNombre').value,
@@ -195,6 +195,9 @@
                 alias: document.getElementById('regAlias').value,
                 password: document.getElementById('regPassword').value
             };
+
+            console.log("Enviando:", userData);
+
             // ===========================================================
 
             fetch("/BDM/Public/api/register.php", {
@@ -206,24 +209,30 @@
             })
             .then(res => res.json())
             .then(data => {
+                console.log("Respuesta:", data);
+
                 if(data.ok){
                     alert("✅ Registro exitoso");
                     switchTab('login');
                 } else {
                     alert("❌ " + data.mensaje);
                 }
+            })
+            .catch(err =>{
+                console.error(err);
+                alert("error con el servidor");
             });
 
             // ===========================================================
 
             
-            console.log('Registrando usuario:', userData);
-            alert(`✅ Registro exitoso como ${selectedUserType}!\nBienvenido ${userData.alias}`);
+            // console.log('Registrando usuario:', userData);
+            // alert(`✅ Registro exitoso como ${selectedUserType}!\nBienvenido ${userData.alias}`);
             
-            // Limpiar formulario y cambiar a login
-            setTimeout(() => {
-                switchTab('login');
-            }, 1500);
+            // // Limpiar formulario y cambiar a login
+            // setTimeout(() => {
+            //     switchTab('login');
+            // }, 1500);
         }
 
         // Autocompletar login
