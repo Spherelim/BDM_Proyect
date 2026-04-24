@@ -19,7 +19,7 @@ class Conexion{
                 self::$conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 self::$conexion->exec("SET NAMES 'utf8'");
 
-                echo "Conectado";
+                //echo "Conectado";
 
             } catch (PDOException $e) {
                 die("Error: ".$e->getMessage());

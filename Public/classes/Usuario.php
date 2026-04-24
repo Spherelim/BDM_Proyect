@@ -1,32 +1,38 @@
 <?php 
 
 class Usuario{
-    public $Nombre;
-    public $Apellidos;
-    public $Fech_Nac;
-    public $Foto;
-    public $Genero;
-    public $Alias;
+    private $db;
 
-    public function __contruct($Nombre,$Apellido,$Fecha_Nac,
-    $Foto,$Genero,$Alias)
-    {
-        $this->Nombre = $Nombre;
-        $this->Apellidos = $Apellido;
-        $this->Fech_Nac = $Fecha_Nac;
-        $this->Foto = $Foto;
-        $this->Genero = $Genero;
-        $this->Alias = $Alias;
+    public function __construct(){
+        $this->db = new DB();
     }
 
-    /*public function __contructor($Nombre,$Apellido)
-    {
-        $this->Nombre = $Nombre;
-        $this->Apellido = $Apellido;
-    }*/
+    public function registrar($data){
+        $resPersona = $this->db->callSP("sp_GestionPersona",[
+            1,
+            null,
+            $data['nombre'],
+            $data['apellidos'],
+            $data['alias'],
+            $data['fechaNacimiento'],
+            null,
+            $data['genero']
+        ]);
 
-    public function MostrarDatos(){
-        echo $this->Nombre;
+        if(!$resPersona["ok"]) return $resPersona;
+
+        $idPersona = $resPersona["data"][0]["IdPersona"];
+
+        $resUsuario = $this->db->callSP("sp_GestionUsuario",[
+            1,
+            null,
+            $data['email'],
+            password_hash($data['password'],PASSWORD_DEFAULT),
+            $data['rol'],
+            $idPersona
+        ]);
+
+        return $resUsuario;
     }
 
 }
