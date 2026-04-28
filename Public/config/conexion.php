@@ -1,7 +1,7 @@
 <?php
 
 class Conexion{
-    private static $host = "localhost";
+    private static $host = "localhost:3306";
     private static $db = "bdm_seguros";
     private static $user = "root";
     private static $pass = "";
