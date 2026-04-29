@@ -6,8 +6,8 @@
                 </div>
 
                 <!-- FORMULARIO DE LOGIN (simplificado) -->
-                <?php include '../includes/Log_Area.php'?>
+                <?php include '../includes/Log/Log_Area.php'?>
 
                 <!-- FORMULARIO DE REGISTRO MEJORADO -->
-                <?php include '../includes/Reg_Area.php'?>
+                <?php include '../includes/Log/Reg_Area.php'?>
             </div>
