@@ -1,0 +1,13 @@
+# Public/.htaccess
+
+# Evitar listado de directorios
+Options -Indexes
+
+# Proteger archivos sensibles
+<FilesMatch "\.(env|json|sql|md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Redirigir errores
+ErrorDocument 404 /BDM_PROYECT/Public/views/404.html

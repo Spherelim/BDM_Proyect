@@ -209,65 +209,110 @@ function toggleRegisterButton() {
 }
 
 // ========== REGISTRO CON PHP ==========
-async function handleRegister() {
-    console.log("Hola soy registro");
 
+// async function handleRegister() {
+//     console.log("Hola soy registro");
+
+//     const btn = document.getElementById('registerBtn');
+//     if (btn.disabled) return;
+    
+//     btn.disabled = true;
+//     btn.textContent = 'Registrando...';
+    
+//     const userData = {
+//         tipoUsuario: selectedUserType,
+//         nombre: document.getElementById('regNombre').value,
+//         apellidos: document.getElementById('regApellidos').value,
+//         fechaNacimiento: document.getElementById('regFechaNacimiento').value,
+//         genero: document.getElementById('regGenero').value,
+//         email: document.getElementById('regEmail').value,
+//         alias: document.getElementById('regAlias').value,
+//         password: document.getElementById('regPassword').value
+//     };
+    
+//     console.log(userData);
+
+//     try {
+//         const response = await fetch('../api/register.php', {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify(userData)
+//         });
+        
+//         console.log(response);
+
+//         const result = await response.json();
+
+//         if (result.ok) {
+//             showMessage(result.mensaje || '✅ Registro exitoso', false);
+//             setTimeout(() => {
+//                 switchTab('login');
+//                 // Limpiar formulario
+//                 document.getElementById('regNombre').value = '';
+//                 document.getElementById('regApellidos').value = '';
+//                 document.getElementById('regFechaNacimiento').value = '';
+//                 document.getElementById('regGenero').value = '';
+//                 document.getElementById('regEmail').value = '';
+//                 document.getElementById('regAlias').value = '';
+//                 document.getElementById('regPassword').value = '';
+//                 document.getElementById('regConfirmPassword').value = '';
+//                 document.getElementById('ageVerification').checked = false;
+//                 removePhoto();
+//                 selectedUserType = '';
+//                 document.querySelectorAll('.user-type').forEach(el => {
+//                     el.classList.remove('selected');
+//                 });
+//             }, 2000);
+//         } else {
+//             showMessage('❌ Error: ' + (result.mensaje || 'Error desconocido'));
+//         }
+//     } catch (error) {
+//         // console.error('Error:', error);
+//         showMessage('❌ Error de conexión con el servidor');
+//     } finally {
+//         btn.disabled = false;
+//         btn.textContent = 'Registrarse';
+//     }
+// }
+
+async function handleRegister() {
     const btn = document.getElementById('registerBtn');
     if (btn.disabled) return;
-    
+
     btn.disabled = true;
     btn.textContent = 'Registrando...';
-    
+
     const userData = {
         tipoUsuario: selectedUserType,
-        nombre: document.getElementById('regNombre').value,
-        apellidos: document.getElementById('regApellidos').value,
+        nombre: document.getElementById('regNombre').value.trim(),
+        apellidos: document.getElementById('regApellidos').value.trim(),
         fechaNacimiento: document.getElementById('regFechaNacimiento').value,
         genero: document.getElementById('regGenero').value,
-        email: document.getElementById('regEmail').value,
-        alias: document.getElementById('regAlias').value,
+        email: document.getElementById('regEmail').value.trim(),
+        alias: document.getElementById('regAlias').value.trim(),
         password: document.getElementById('regPassword').value
     };
-    
-    console.log(userData);
 
     try {
-        const response = await fetch('../api/register.php', {
+        const response = await fetch('/BDM_PROYECT/Public/api/auth/register.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userData)
         });
-        
-        console.log(response);
 
         const result = await response.json();
 
         if (result.ok) {
-            showMessage(result.mensaje || '✅ Registro exitoso', false);
+            showMessage(result.mensaje, false);
             setTimeout(() => {
                 switchTab('login');
-                // Limpiar formulario
-                document.getElementById('regNombre').value = '';
-                document.getElementById('regApellidos').value = '';
-                document.getElementById('regFechaNacimiento').value = '';
-                document.getElementById('regGenero').value = '';
-                document.getElementById('regEmail').value = '';
-                document.getElementById('regAlias').value = '';
-                document.getElementById('regPassword').value = '';
-                document.getElementById('regConfirmPassword').value = '';
-                document.getElementById('ageVerification').checked = false;
-                removePhoto();
-                selectedUserType = '';
-                document.querySelectorAll('.user-type').forEach(el => {
-                    el.classList.remove('selected');
-                });
+                limpiarFormularioRegistro();
             }, 2000);
         } else {
-            showMessage('❌ Error: ' + (result.mensaje || 'Error desconocido'));
+            showMessage('ERROR: ' + result.mensaje);
         }
     } catch (error) {
-        // console.error('Error:', error);
-        showMessage('❌ Error de conexión con el servidor');
+        showMessage('ERROR: Error de conexión con el servidor');
     } finally {
         btn.disabled = false;
         btn.textContent = 'Registrarse';
@@ -275,52 +320,105 @@ async function handleRegister() {
 }
 
 // ========== LOGIN CON PHP ==========
+// async function handleLogin() {
+//     console.log("🔍 handleLogin ejecutándose...");
+    
+//     const email = document.getElementById('loginEmail').value;
+//     const password = document.getElementById('loginPassword').value;
+    
+//     if (!email || !password) {
+//         showMessage('❌ Por favor completa todos los campos');
+//         return;
+//     }
+    
+//     // Crear selector de tipo de usuario si no existe
+//     let tipoUsuario = '';
+//     let typeSelect = document.getElementById('loginUserType');
+    
+//     if (!typeSelect) {
+//         const loginForm = document.getElementById('loginForm');
+//         const btn = loginForm.querySelector('.btn');
+//         const selectHtml = `
+//             <div class="form-group" id="userTypeGroup">
+//                 <label>Tipo de Usuario <span class="required">*</span></label>
+//                 <select id="loginUserType">
+//                     <option value="">Seleccionar tipo</option>
+//                     <option value="ajustador">🔧 Ajustador</option>
+//                     <option value="supervisor">✓ Supervisor</option>
+//                     <option value="asegurado">👤 Asegurado</option>
+//                 </select>
+//             </div>
+//         `;
+//         btn.insertAdjacentHTML('beforebegin', selectHtml);
+//         typeSelect = document.getElementById('loginUserType');
+//     }
+    
+//     tipoUsuario = typeSelect.value;
+    
+//     if (!tipoUsuario) {
+//         showMessage('❌ Por favor selecciona el tipo de usuario');
+//         return;
+//     }
+    
+//     const loginBtn = document.querySelector('#loginForm .btn');
+//     loginBtn.disabled = true;
+//     loginBtn.textContent = 'Iniciando sesión...';
+    
+//     try {
+//         const response = await fetch('../api/Log.php', {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify({
+//                 email: email,
+//                 password: password,
+//                 tipoUsuario: tipoUsuario
+//             })
+//         });
+        
+//         const result = await response.json();
+        
+//         if (result.ok) {
+//             showMessage(result.mensaje || '✅ Inicio de sesión exitoso', false);
+//             setTimeout(() => {
+//                 // 🔴 CAMBIO IMPORTANTE: Redirige al mismo dashboard para todos los roles
+//                 window.location.href = '/BDM_PROYECT/index.php';
+//             }, 1500);
+//         } else {
+//             showMessage('❌ Error: ' + (result.mensaje || 'Credenciales incorrectas'));
+//         }
+//     } catch (error) {
+//         // console.error('Error:', error);
+//         showMessage('❌ Error de conexión con el servidor');
+//     } finally {
+//         loginBtn.disabled = false;
+//         loginBtn.textContent = 'Iniciar Sesión';
+//     }
+// }
+
 async function handleLogin() {
-    console.log("🔍 handleLogin ejecutándose...");
-    
-    const email = document.getElementById('loginEmail').value;
+    const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    
+
     if (!email || !password) {
-        showMessage('❌ Por favor completa todos los campos');
+        showMessage('❌ Completa todos los campos');
         return;
     }
-    
-    // Crear selector de tipo de usuario si no existe
-    let tipoUsuario = '';
-    let typeSelect = document.getElementById('loginUserType');
-    
-    if (!typeSelect) {
-        const loginForm = document.getElementById('loginForm');
-        const btn = loginForm.querySelector('.btn');
-        const selectHtml = `
-            <div class="form-group" id="userTypeGroup">
-                <label>Tipo de Usuario <span class="required">*</span></label>
-                <select id="loginUserType">
-                    <option value="">Seleccionar tipo</option>
-                    <option value="ajustador">🔧 Ajustador</option>
-                    <option value="supervisor">✓ Supervisor</option>
-                    <option value="asegurado">👤 Asegurado</option>
-                </select>
-            </div>
-        `;
-        btn.insertAdjacentHTML('beforebegin', selectHtml);
-        typeSelect = document.getElementById('loginUserType');
-    }
-    
-    tipoUsuario = typeSelect.value;
+
+    let tipoUsuario = document.getElementById('loginUserType')?.value;
     
     if (!tipoUsuario) {
-        showMessage('❌ Por favor selecciona el tipo de usuario');
+        // Crear selector si no existe
+        crearSelectorTipoUsuario();
+        showMessage('❌ Selecciona el tipo de usuario');
         return;
     }
-    
+
     const loginBtn = document.querySelector('#loginForm .btn');
     loginBtn.disabled = true;
-    loginBtn.textContent = 'Iniciando sesión...';
-    
+    loginBtn.textContent = 'Iniciando...';
+
     try {
-        const response = await fetch('../api/Log.php', {
+        const response = await fetch('/BDM_PROYECT/Public/api/auth/login.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -329,54 +427,54 @@ async function handleLogin() {
                 tipoUsuario: tipoUsuario
             })
         });
-        
+
         const result = await response.json();
-        
+
         if (result.ok) {
-            showMessage(result.mensaje || '✅ Inicio de sesión exitoso', false);
+            showMessage(result.mensaje, false);
             setTimeout(() => {
-                // 🔴 CAMBIO IMPORTANTE: Redirige al mismo dashboard para todos los roles
-                window.location.href = '/BDM_PROYECT/index.php';
+                window.location.href = '/BDM_PROYECT/Public/index.php';
             }, 1500);
         } else {
-            showMessage('❌ Error: ' + (result.mensaje || 'Credenciales incorrectas'));
+            showMessage('ERROR: ' + result.mensaje);
         }
     } catch (error) {
-        // console.error('Error:', error);
-        showMessage('❌ Error de conexión con el servidor');
+        showMessage('ERROR: Error de conexión');
     } finally {
         loginBtn.disabled = false;
         loginBtn.textContent = 'Iniciar Sesión';
     }
 }
 
+// Creo que esto no lo vamos a usar
+// ↓↓↓↓↓↓↓↓↓
 // Autocompletar login
-function fillLogin(email, password, type) {
-    document.getElementById('loginEmail').value = email;
-    document.getElementById('loginPassword').value = password;
+// function fillLogin(email, password, type) {
+//     document.getElementById('loginEmail').value = email;
+//     document.getElementById('loginPassword').value = password;
     
-    let typeSelect = document.getElementById('loginUserType');
-    if (!typeSelect) {
-        const loginForm = document.getElementById('loginForm');
-        const btn = loginForm.querySelector('.btn');
-        const selectHtml = `
-            <div class="form-group">
-                <label>Tipo de Usuario <span class="required">*</span></label>
-                <select id="loginUserType">
-                    <option value="">Seleccionar tipo</option>
-                    <option value="ajustador">🔧 Ajustador</option>
-                    <option value="supervisor">✓ Supervisor</option>
-                    <option value="asegurado">👤 Asegurado</option>
-                </select>
-            </div>
-        `;
-        btn.insertAdjacentHTML('beforebegin', selectHtml);
-        typeSelect = document.getElementById('loginUserType');
-    }
+//     let typeSelect = document.getElementById('loginUserType');
+//     if (!typeSelect) {
+//         const loginForm = document.getElementById('loginForm');
+//         const btn = loginForm.querySelector('.btn');
+//         const selectHtml = `
+//             <div class="form-group">
+//                 <label>Tipo de Usuario <span class="required">*</span></label>
+//                 <select id="loginUserType">
+//                     <option value="">Seleccionar tipo</option>
+//                     <option value="ajustador">🔧 Ajustador</option>
+//                     <option value="supervisor">✓ Supervisor</option>
+//                     <option value="asegurado">👤 Asegurado</option>
+//                 </select>
+//             </div>
+//         `;
+//         btn.insertAdjacentHTML('beforebegin', selectHtml);
+//         typeSelect = document.getElementById('loginUserType');
+//     }
     
-    typeSelect.value = type;
-    showMessage(`✅ Perfil ${type} cargado. Presiona "Iniciar Sesión"`, false);
-}
+//     typeSelect.value = type;
+//     showMessage(`✅ Perfil ${type} cargado. Presiona "Iniciar Sesión"`, false);
+// }
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', function() {
@@ -392,3 +490,57 @@ document.addEventListener('DOMContentLoaded', function() {
     if (generoSelect) generoSelect.addEventListener('change', toggleRegisterButton);
     if (aliasInput) aliasInput.addEventListener('input', toggleRegisterButton);
 });
+
+// ========== FUNCIONES AUXILIARES ==========
+function crearSelectorTipoUsuario() {
+    const loginForm = document.getElementById('loginForm');
+    const btn = loginForm.querySelector('.btn');
+    const selectHtml = `
+        <div class="form-group">
+            <label>Tipo de Usuario <span class="required">*</span></label>
+            <select id="loginUserType">
+                <option value="">Seleccionar tipo</option>
+                <option value="ajustador">🔧 Ajustador</option>
+                <option value="supervisor">✓ Supervisor</option>
+                <option value="asegurado">👤 Asegurado</option>
+            </select>
+        </div>
+    `;
+    btn.insertAdjacentHTML('beforebegin', selectHtml);
+}
+
+function limpiarFormularioRegistro() {
+    ['regNombre', 'regApellidos', 'regFechaNacimiento', 'regGenero', 
+     'regEmail', 'regAlias', 'regPassword', 'regConfirmPassword'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    
+    document.getElementById('ageVerification').checked = false;
+    removePhoto();
+    selectedUserType = '';
+    document.querySelectorAll('.user-type').forEach(el => el.classList.remove('selected'));
+}
+
+function showMessage(message, isError = true) {
+    let msgDiv = document.getElementById('floatingMessage');
+    if (!msgDiv) {
+        msgDiv = document.createElement('div');
+        msgDiv.id = 'floatingMessage';
+        msgDiv.style.cssText = `
+            position: fixed; top: 20px; right: 20px; padding: 15px 25px;
+            border-radius: 12px; color: white; font-weight: bold; z-index: 9999;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        `;
+        document.body.appendChild(msgDiv);
+    }
+
+    msgDiv.style.background = isError ? '#dc3545' : '#28a745';
+    msgDiv.textContent = message;
+    msgDiv.style.display = 'block';
+
+    setTimeout(() => {
+        msgDiv.style.display = 'none';
+    }, 4000);
+}
