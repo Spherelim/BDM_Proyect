@@ -1,0 +1,14 @@
+#Variables de entorno
+.env
+
+# Logs
+*.log
+error_log
+
+# Sistema
+.DB_Store
+Thumbs.db
+
+# PHP
+vendor/
+*.cache
