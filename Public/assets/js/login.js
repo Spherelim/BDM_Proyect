@@ -294,7 +294,7 @@ async function handleRegister() {
     };
 
     try {
-        const response = await fetch('/BDM_PROYECT/Public/api/auth/register.php', {
+        const response = await fetch('/BDM_PROYECT/Public/api/register.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userData)
@@ -396,16 +396,22 @@ async function handleRegister() {
 // }
 
 async function handleLogin() {
+
+    console.log("Entro en Log");
+
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
 
+    console.log("Comprobando Datos...");
     if (!email || !password) {
         showMessage('❌ Completa todos los campos');
         return;
     }
 
+    console.log("Agarrando Tipo de Usuario.");
     let tipoUsuario = document.getElementById('loginUserType')?.value;
     
+    console.log("Comprobando Tipo de Usuario...");
     if (!tipoUsuario) {
         // Crear selector si no existe
         crearSelectorTipoUsuario();
@@ -417,8 +423,11 @@ async function handleLogin() {
     loginBtn.disabled = true;
     loginBtn.textContent = 'Iniciando...';
 
+    console.log("Entrando en try Catch");
     try {
-        const response = await fetch('/BDM_PROYECT/Public/api/auth/login.php', {
+        console.log("Dentro de try Catch");
+
+        const response = await fetch('/BDM_PROYECT/Public/api/Log.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -427,6 +436,8 @@ async function handleLogin() {
                 tipoUsuario: tipoUsuario
             })
         });
+
+        console.log("RESPONSE: " + response);
 
         const result = await response.json();
 
@@ -438,6 +449,7 @@ async function handleLogin() {
         } else {
             showMessage('ERROR: ' + result.mensaje);
         }
+
     } catch (error) {
         showMessage('ERROR: Error de conexión');
     } finally {
