@@ -1,27 +1,22 @@
-<?php
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoGest Seguros - Nuevo Siniestro</title>
+    <link rel="stylesheet" href="../assets/style/nuevosiniestro.css">
+</head>
+<body>
 
-    /*
+    <?php include '../includes/header.php' ?>
 
-    Para trabajar más Limpio y así, vamos a dividir las 
-    paginas por partes, así como lo hice con el Login.php y
-    index.php.
+    <!-- CONTENEDOR PRINCIPAL -->
+    <?php include '../includes/Siniestros/Siniestro_Container.php' ?>   
 
-    echale un vistazo, hazlo así, no es tan dificil la vdd,
-    ¡¡¡¡ NO SE LO PIDAS A LA IA !!!!, por que no lo hace bien xd.
+    <!-- MODAL DE CONFIRMACIÓN -->
+    <?php include '../includes/Siniestros/Modal_SinReg.php' ?>
 
-    las Paginas se encuentran en la carpeta "view"
-
-    Todos los Js y css, los movi en la carpeta "assets".
-
-    ahi deje los html que hiciste, solo es de dividirlos por partes.
-
-    TAMBIEN para que no lo tengas que pues... dejarlo regado,
-    ahí te deje creado las carpetas en "includes", para cada pagina.
-
-    antes de todo, crea tu .env
-
-    Creo que es toddo, cualquier duda, dime.
-
-    */
-
-?>
+    <script src="../assets/js/nuevosiniestro.js"></script>
+    
+</body>
+</html>

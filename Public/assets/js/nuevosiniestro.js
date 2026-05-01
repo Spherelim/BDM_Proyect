@@ -394,7 +394,7 @@
 
         function cancelarRegistro() {
             if (confirm('¿Estás seguro de cancelar el registro? Se perderán todos los datos ingresados.')) {
-                window.location.href = 'dashboard_ajustador.html';
+                window.location.href = '../../index.php';
             }
         }
 

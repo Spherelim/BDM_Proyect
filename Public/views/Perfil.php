@@ -1,27 +1,43 @@
-<?php
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoGest Seguros - Mi Perfil</title>
+    <link rel="stylesheet" href="../assets/style/perfil.css">
+</head>
+<body>
+    <!-- HEADER -->
+    <?php include '../includes/Perfil/Perfil_Header.php' ?>
+    <!-- <header class="header">
+        <div class="logo" onclick="irDashboard()">
+            <h1>AutoGest Seguros</h1>
+            <span>Mi Perfil</span>
+        </div>
+        <div class="user-menu">
+            <div class="notifications" onclick="showNotifications()">
+                <span>🔔</span>
+            </div>
+            <div class="user-info" onclick="irPerfil()">
+                <div class="user-details">
+                    <div class="user-name" id="userNameDisplay">Juan</div>
+                    <div class="user-role" id="userRoleDisplay">Ajustador</div>
+                </div>
+                <div class="avatar" id="userAvatar">JP</div>
+            </div>
+        </div>
+    </header> -->
 
-    /*
+    <!-- CONTENEDOR PRINCIPAL -->
+    <?php include '../includes/Perfil/Perfil_Container.php' ?>
 
-    Para trabajar más Limpio y así, vamos a dividir las 
-    paginas por partes, así como lo hice con el Login.php y
-    index.php.
+    <!-- MODAL DE CIERRE DE SESIÓN -->
+    <?php include '../includes/Perfil/Modal_CerrarSes.php' ?>
 
-    echale un vistazo, hazlo así, no es tan dificil la vdd,
-    ¡¡¡¡ NO SE LO PIDAS A LA IA !!!!, por que no lo hace bien xd.
+    <!-- MODAL DE CAMBIO DE CONTRASEÑA (simulado) -->
+    <?php include '../includes/Perfil/Modal_PassChange.php'?>
 
-    las Paginas se encuentran en la carpeta "view"
-
-    Todos los Js y css, los movi en la carpeta "assets".
-
-    ahi deje los html que hiciste, solo es de dividirlos por partes.
-
-    TAMBIEN para que no lo tengas que pues... dejarlo regado,
-    ahí te deje creado las carpetas en "includes", para cada pagina.
-
-    antes de todo, crea tu .env
-
-    Creo que es toddo, cualquier duda, dime.
-
-    */
-
-?>
+    <script src="../assets/js/perfil.js"></script>
+    
+</body>
+</html>

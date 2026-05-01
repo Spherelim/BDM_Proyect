@@ -92,14 +92,16 @@
             try{
                 //Buscar el Usuario por email
                 // cambiar por un SP
-                $sql = "SELECT u.ID_Usuario, u.Nombre, u.Apellidos, u.Alias, 
-                           u.Correo, u.Contra, u.Genero, u.Foto_Perfil,
-                           r.Nombre_Rol
-                    FROM usuario u
-                    INNER JOIN rol r ON u.ID_Rol = r.ID_Rol
-                    WHERE u.Correo = :email 
-                    AND LOWER(r.Nombre_Rol) = LOWER(:tipo)
-                    LIMIT 1";
+                // $sql = "SELECT u.ID_Usuario, u.Nombre, u.Apellidos, u.Alias, 
+                //            u.Correo, u.Contra, u.Genero, u.Foto_Perfil,
+                //            r.Nombre_Rol
+                //     FROM usuario u
+                //     INNER JOIN rol r ON u.ID_Rol = r.ID_Rol
+                //     WHERE u.Correo = :email 
+                //     AND LOWER(r.Nombre_Rol) = LOWER(:tipo)
+                //     LIMIT 1";
+
+                $sql = "SELECT ID_Usuario, Correo, Contra FROM usuario WHERE Correo = :email LIMIT 1"
 
                 $usuario = $this->db->getRow($sql, [
                     ':email' => $email,
