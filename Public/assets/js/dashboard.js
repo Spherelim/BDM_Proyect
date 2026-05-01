@@ -805,7 +805,7 @@
         }
 
         function abrirModalNuevoSiniestro() {
-            alert('Abrir formulario para nuevo siniestro');
+            window.location.href = 'Public/views/NuevoSiniestro.php'
         }
 
         function generarReporte() {
