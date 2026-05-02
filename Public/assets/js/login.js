@@ -276,6 +276,9 @@ function toggleRegisterButton() {
 // }
 
 async function handleRegister() {
+
+    console.log("Entrando en Registro.");
+
     const btn = document.getElementById('registerBtn');
     if (btn.disabled) return;
 
@@ -294,6 +297,9 @@ async function handleRegister() {
     };
 
     try {
+
+        console.log("Dentro del Try Catch");
+
         const response = await fetch('/BDM_PROYECT/Public/api/register.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -437,14 +443,12 @@ async function handleLogin() {
             })
         });
 
-        console.log("RESPONSE: " + response);
-
         const result = await response.json();
 
         if (result.ok) {
             showMessage(result.mensaje, false);
             setTimeout(() => {
-                window.location.href = '/BDM_PROYECT/Public/index.php';
+                window.location.href = '/BDM_PROYECT/index.php';
             }, 1500);
         } else {
             showMessage('ERROR: ' + result.mensaje);

@@ -2,7 +2,7 @@
 
     // esta mauser va manejar el registro y el login.
 
-    require_once __DIR__ . '/DB.php'
+    require_once __DIR__ . '/DB.php';
 
     class Autenticacion{
         private $db;
@@ -27,7 +27,7 @@
                 }
 
                 // alias unico
-                if($this->aliasExistente($datos['alias'])){
+                if($this->aliasExiste($datos['alias'])){
                     return [
                         'ok' => false,
                         'mensaje' => 'Este alias ya está en uso'
@@ -44,33 +44,39 @@
                 $roles = [
                     'ajustador' => 1,
                     'supervisor' => 2,
-                    'asegurador' => 3
+                    'asegurado' => 3
                 ];
 
                 $rolId = $roles[$datos['tipoUsuario']] ?? 3;
                 $genero = ($datos['genero'] === 'masculino') ? 1 : 0;
 
                 // cambiar a SP
-                $sql = "INSERT INTO usuario (
-                        Nombre, Apellidos, Alias, Fecha_Nacimiento, 
-                        Genero, Correo, Contra, ID_Rol
-                    ) VALUES (
-                        :nombre, :apellidos, :alias, :fecha_nacimiento,
-                        :genero, :email, :password, :rol
-                    )";
-
-                $params = [
+                // PRIMERO: Insertar en persona
+                $sqlPersona = "INSERT INTO persona (Nombre, Apellido, FechaNac, Genero, Alias) 
+                            VALUES (:nombre, :apellido, :fecha_nacimiento, :genero, :alias)";
+                
+                $paramsPersona = [
                     ':nombre' => $datos['nombre'],
-                    ':apellidos' => $datos['apellidos'],
-                    ':alias' => $datos['alias'],
+                    ':apellido' => $datos['apellidos'],
                     ':fecha_nacimiento' => $datos['fechaNacimiento'],
                     ':genero' => $genero,
-                    ':email' => $datos['email'],
-                    ':password' => $passwordHash,
-                    ':rol' => $rolId
+                    ':alias' => $datos['alias']
                 ];
 
-                $userId = $this->db->query($sql,$params);
+                $idPersona = $this->db->query($sqlPersona, $paramsPersona);
+
+                // SEGUNDO: Insertar en usuario con el id_persona
+                $sqlUsuario = "INSERT INTO usuario (Correo, Contra, id_rol, id_persona, Activo) 
+                            VALUES (:email, :password, :rol, :id_persona, 1)";
+                
+                $paramsUsuario = [
+                    ':email' => $datos['email'],
+                    ':password' => $passwordHash,
+                    ':rol' => $rolId,
+                    ':id_persona' => $idPersona
+                ];
+
+                $userId = $this->db->query($sqlUsuario, $paramsUsuario);
 
                 return [
                     'ok' => true,
@@ -78,10 +84,10 @@
                     'userId' => $userId
                 ];
 
-            } catch (Exceptioon $e){
+            } catch (Exception $e) {  // ← CORREGIDO: Exception no Exceptioon
                 error_log("Error en registro: " . $e->getMessage());
                 return [
-                    'ok' => true,
+                    'ok' => false,
                     'mensaje' => 'Error al registrar: ' . $e->getMessage()
                 ];
             }
@@ -92,16 +98,17 @@
             try{
                 //Buscar el Usuario por email
                 // cambiar por un SP
-                // $sql = "SELECT u.ID_Usuario, u.Nombre, u.Apellidos, u.Alias, 
-                //            u.Correo, u.Contra, u.Genero, u.Foto_Perfil,
-                //            r.Nombre_Rol
-                //     FROM usuario u
-                //     INNER JOIN rol r ON u.ID_Rol = r.ID_Rol
-                //     WHERE u.Correo = :email 
-                //     AND LOWER(r.Nombre_Rol) = LOWER(:tipo)
-                //     LIMIT 1";
+                $sql = "SELECT u.ID_Usuario, p.Nombre, p.Apellido, p.Alias, 
+                           u.Correo, u.Contra, p.Genero, p.Foto,
+                           r.Nombre AS Nombre_Rol
+                    FROM usuario u
+                    INNER JOIN rol r ON u.id_rol = r.ID_Rol
+                    INNER JOIN persona p ON u.id_persona = p.ID_Persona
+                    WHERE u.Correo = :email 
+                    AND LOWER(r.Nombre) = LOWER(:tipo)
+                    LIMIT 1";
 
-                $sql = "SELECT ID_Usuario, Correo, Contra FROM usuario WHERE Correo = :email LIMIT 1"
+                // $sql = "SELECT ID_Usuario, Correo, Contra FROM usuario WHERE Correo = :email LIMIT 1";
 
                 $usuario = $this->db->getRow($sql, [
                     ':email' => $email,
@@ -116,23 +123,38 @@
                 }
 
                 // verificar la contraseña
-                if(!password_verify($password,$usuario['Contra'])){
-                    return[
-                        'ok' => true,
-                        'mensaje' => '¡Bienvenido ' . $usuario['nombre'] . '!',
-                        'usuario' => [
-                            'id' => $usuario['ID_Usuario'],
-                            'nombre' => $usuario['Nombre'],
-                            'alias' => $usuario['Alias'],
-                            'rol' => $usuario['Nombre_Rol']
-                        ]
+                $verifyResult = password_verify($password, $usuario['Contra']);
+                $debug['password_verify_result'] = $verifyResult;
+
+                if (!$verifyResult) {
+                    return [
+                        'ok' => false,
+                        'mensaje' => 'Contraseña Incorrecta',
+                        'debug' => $debug
                     ];
                 }
+
+                // Si todo está bien, iniciar sesión
+                $this->iniciarSesion($usuario);
+
+                 return [
+                    'ok' => true,
+                    'mensaje' => '¡Bienvenido ' . $usuario['Nombre'] . '!',
+                    'usuario' => [
+                        'id' => $usuario['ID_Usuario'],
+                        'nombre' => $usuario['Nombre'],
+                        'alias' => $usuario['Alias'],
+                        'rol' => $usuario['Nombre_Rol']
+                    ],
+                    'debug' => $debug
+                ];
+
+
             } catch (Exception $e){
                 error_log("Error en login: " . $e->getMessage());
                 return [
                     'ok' => false,
-                    'mensaje' => 'Error al iniciar sesión'
+                    'mensaje' => 'Error al iniciar sesión' . $e->getMessage()
                 ];
             }
         }
@@ -213,7 +235,7 @@
         private function aliasExiste($alias){
             // cambiar por un SP
             $result = $this->db->getRow(
-                "SELECT ID_Usuario FROM usuario WHERE Alias = :alias",
+                "SELECT ID_Persona FROM persona WHERE Alias = :alias",
             [':alias' => $alias]
             );
             return !empty($result);
@@ -227,11 +249,11 @@
             $_SESSION['usuario'] = [
                 'id' => $usuario['ID_Usuario'],
                 'nombre' => $usuario['Nombre'],
-                'apellidos' => $usuario['Apellidos'],
+                'apellidos' => $usuario['Apellido'],
                 'alias' => $usuario['Alias'],
                 'email' => $usuario['Correo'],
                 'rol' => $usuario['Nombre_Rol'],
-                'foto' => $usuario['Foto_Perfil'] ?? null
+                'foto' => $usuario['Foto'] ?? null
             ];
 
             session_regenerate_id(true);

@@ -1,5 +1,9 @@
 <?php
-    require_once __DIR__ . '/../../classes/Autenticacion.php';
+    // DEBUG
+    error_reporting(E_ALL);
+    ini_set('display_errors',1);
+
+    require_once __DIR__ . '/../classes/Autenticacion.php';
 
     header("Content-Type: application/json");
 
@@ -15,7 +19,8 @@
     }
 
     // obtener datitos riquitos
-    $data = json_decode(file_get_contents("php://input"),true);
+    $rawData = file_get_contents("php://input");
+    $data = json_decode($rawData,true);
 
     if(!$data){
         echo json_encode(
