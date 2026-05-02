@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1:3306
--- Tiempo de generación: 25-04-2026 a las 00:25:58
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 02-05-2026 a las 05:55:31
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -532,7 +532,7 @@ CREATE TABLE `persona` (
 --
 
 INSERT INTO `persona` (`ID_Persona`, `Nombre`, `Apellido`, `FechaNac`, `Foto`, `Genero`, `Alias`) VALUES
-(1, 'Jose Alejandro', 'Hernandez Hernandez', '2004-06-06', NULL, b'1', 'Joselito');
+(1, 'Mauricio Eleuterio', 'Ortiz Rodriguez', '2004-12-06', NULL, b'1', 'El señor de los Anillos');
 
 --
 -- Disparadores `persona`
@@ -544,7 +544,7 @@ CREATE TRIGGER `tr_BajaPersona` BEFORE DELETE ON `persona` FOR EACH ROW BEGIN
     WHERE id_persona = OLD.ID_Persona;
     
     SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'No se permite eliminar, se aplicó baja lógica';
+    SET MESSAGE_TEXT = 'No se permite eliminar, se aplicó baka lógica';
 END
 $$
 DELIMITER ;
@@ -563,13 +563,6 @@ CREATE TABLE `poliza` (
   `id_Usuario` int(11) NOT NULL,
   `id_Compania` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `poliza`
---
-
-INSERT INTO `poliza` (`ID_Poliza`, `Num_Polisa`, `Fecha_In`, `Fecha_Fin`, `id_Usuario`, `id_Compania`) VALUES
-(1, 2147483647, '2020-01-01', '2027-01-01', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -670,20 +663,19 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`ID_Usuario`, `Correo`, `Contra`, `Activo`, `id_rol`, `id_persona`, `Fech_Alta`, `Fech_Mod`) VALUES
-(1, 'Jose@gmail.com', 'Hola_SOY1.', b'1', 1, 1, '2026-04-23 21:36:26', '2026-04-23 21:36:26');
+(1, 'mau.ortiz@gmail.com', '$2y$12$AmXeHYaFRrjwaqVCBP.iEuIxL3CE2UR9zM9PMCXhINzFB1JJF9cLi', b'1', 1, 1, '2026-05-01 21:48:23', '2026-05-01 21:48:23');
 
 --
 -- Disparadores `usuario`
 --
 DELIMITER $$
 CREATE TRIGGER `tr_BajaLogicaUs` BEFORE DELETE ON `usuario` FOR EACH ROW BEGIN
- UPDATE usuario US
- SET US.Activo = 0
- WHERE US.ID_Usuario = OLD.ID_Usuario;
- 
- SIGNAL SQLSTATE '45000'
- SET MESSAGE_TEXT = 'Baja lógica aplicada, no se eliminó el registro';
- 
+	UPDATE usuario US
+    SET US.Activo = 0
+    WHERE US.ID_Usuario = OLD.ID_Usuario;
+    
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Baja lógica aplicada, no se eliminó el registro';
 END
 $$
 DELIMITER ;
@@ -939,7 +931,8 @@ ALTER TABLE `unidad`
 ALTER TABLE `usuario`
   ADD PRIMARY KEY (`ID_Usuario`),
   ADD KEY `id_rol` (`id_rol`),
-  ADD KEY `id_persona` (`id_persona`);
+  ADD KEY `id_persona` (`id_persona`),
+  ADD KEY `Correo` (`Correo`,`Contra`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -967,7 +960,7 @@ ALTER TABLE `persona`
 -- AUTO_INCREMENT de la tabla `poliza`
 --
 ALTER TABLE `poliza`
-  MODIFY `ID_Poliza` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `ID_Poliza` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `rol`
