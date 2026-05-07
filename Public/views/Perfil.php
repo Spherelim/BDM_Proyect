@@ -7,37 +7,35 @@
     <link rel="stylesheet" href="../assets/style/perfil.css">
 </head>
 <body>
-    <!-- HEADER -->
-    <?php include '../includes/Perfil/Perfil_Header.php' ?>
-    <!-- <header class="header">
-        <div class="logo" onclick="irDashboard()">
-            <h1>AutoGest Seguros</h1>
-            <span>Mi Perfil</span>
+    <!-- HEADER DE NAVEGACIÓN (similar al dashboard) -->
+    <header class="header">
+    <div class="logo" onclick="irDashboard()" style="cursor: pointer;">
+        <h1>AutoGest Seguros</h1>
+        <span>Mi Perfil</span>
+    </div>
+    <div class="user-menu">
+        <div class="notifications" onclick="showNotifications()">
+            <span>🔔</span>
         </div>
-        <div class="user-menu">
-            <div class="notifications" onclick="showNotifications()">
-                <span>🔔</span>
+        <div class="user-info" onclick="toggleUserMenu()" style="cursor: pointer;">
+            <div class="user-details">
+                <div class="user-name" id="userNameDisplay">Cargando...</div>
+                <div class="user-role" id="userRoleDisplay"></div>
             </div>
-            <div class="user-info" onclick="irPerfil()">
-                <div class="user-details">
-                    <div class="user-name" id="userNameDisplay">Juan</div>
-                    <div class="user-role" id="userRoleDisplay">Ajustador</div>
-                </div>
-                <div class="avatar" id="userAvatar">JP</div>
-            </div>
+            <div class="avatar" id="userAvatar"></div>
         </div>
-    </header> -->
+    </div>
+</header>
 
-    <!-- CONTENEDOR PRINCIPAL -->
+    <!-- CONTENEDOR PRINCIPAL DEL PERFIL -->
     <?php include '../includes/Perfil/Perfil_Container.php' ?>
 
     <!-- MODAL DE CIERRE DE SESIÓN -->
     <?php include '../includes/Perfil/Modal_CerrarSes.php' ?>
 
-    <!-- MODAL DE CAMBIO DE CONTRASEÑA (simulado) -->
+    <!-- MODAL DE CAMBIO DE CONTRASEÑA -->
     <?php include '../includes/Perfil/Modal_PassChange.php'?>
 
     <script src="../assets/js/perfil.js"></script>
-    
 </body>
 </html>

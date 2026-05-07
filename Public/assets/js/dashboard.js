@@ -18,17 +18,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
         
-        // Guardar usuario real logueado
         currentUser = data;
         console.log("Usuario logueado:", currentUser);
         
-        // Actualizar header con datos reales
         actualizarHeader();
-        
-        // Mostrar banner según el rol
         mostrarBienvenida();
-        
-        // Cargar siniestros desde la base de datos
         await cargarSiniestros();
         
     } catch (error) {
@@ -106,7 +100,6 @@ async function cargarSiniestros() {
             </div>
         `;
         
-        // Llamar a la API que trae los siniestros según el rol
         const response = await fetch(`Public/api/siniestros.php`);
         const data = await response.json();
         
@@ -302,3 +295,25 @@ function registrarPagoDeducible(id) { alert(`Registrar pago deducible ${id}`); }
 function registrarPagoIndemnizacion(id) { alert(`Registrar pago indemnización ${id}`); }
 function subirEvidencia(id) { alert(`Subir evidencia ${id}`); }
 function editarSiniestro(id) { alert(`Editar siniestro ${id}`); }
+
+// ========== REDIRECCIÓN AL PERFIL ==========
+function irPerfil() {
+    console.log("🔄 Redirigiendo al perfil...");
+    window.location.href = 'Public/views/Perfil.php';
+}
+
+// ========== FUNCIONES DE NAVEGACIÓN PARA PERFIL ==========
+function irDashboard() {
+    window.location.href = '/BDM_Proyect/Public/views/index.php';
+}
+
+function showNotifications() {
+    alert('📢 Notificaciones: No hay notificaciones nuevas');
+}
+
+function toggleUserMenu() {
+    // Mostrar opciones de usuario
+    if (confirm('¿Desea cerrar sesión?')) {
+        cerrarSesion();
+    }
+}
