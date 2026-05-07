@@ -84,7 +84,7 @@
                     'userId' => $userId
                 ];
 
-            } catch (Exception $e) {  // ← CORREGIDO: Exception no Exceptioon
+            } catch (Exception $e) {
                 error_log("Error en registro: " . $e->getMessage());
                 return [
                     'ok' => false,
@@ -97,9 +97,9 @@
         public function login($email,$password,$tipoUsuario){
             try{
                 //Buscar el Usuario por email
-                // cambiar por un SP
+                // AHORA INCLUYE p.FechaNac para la sesión
                 $sql = "SELECT u.ID_Usuario, p.Nombre, p.Apellido, p.Alias, 
-                           u.Correo, u.Contra, p.Genero, p.Foto,
+                           u.Correo, u.Contra, p.Genero, p.Foto, p.FechaNac,
                            r.Nombre AS Nombre_Rol
                     FROM usuario u
                     INNER JOIN rol r ON u.id_rol = r.ID_Rol
@@ -107,8 +107,6 @@
                     WHERE u.Correo = :email 
                     AND LOWER(r.Nombre) = LOWER(:tipo)
                     LIMIT 1";
-
-                // $sql = "SELECT ID_Usuario, Correo, Contra FROM usuario WHERE Correo = :email LIMIT 1";
 
                 $usuario = $this->db->getRow($sql, [
                     ':email' => $email,
@@ -253,13 +251,13 @@
                 'alias' => $usuario['Alias'],
                 'email' => $usuario['Correo'],
                 'rol' => $usuario['Nombre_Rol'],
-                'foto' => $usuario['Foto'] ?? null
+                'foto' => $usuario['Foto'] ?? null,
+                'fecha_nacimiento' => $usuario['FechaNac'] ?? null,
+                'genero' => $usuario['Genero'] ?? null
             ];
 
             session_regenerate_id(true);
         }
-
-
 
     }
 

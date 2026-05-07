@@ -1,89 +1,257 @@
+// ========== VARIABLES GLOBALES ==========
+let currentUser = null;
 
-        // ========== CONFIGURACIÓN DE USUARIO ==========
-        const currentUser = {
-            type: 'ajustador',
-            id: 'AJU-2024-001',
-            nombre: 'Juan',
-            apellidos: 'Pérez García',
-            nombreCompleto: 'Juan Pérez García',
-            fechaNacimiento: '15 de mayo de 1985',
-            genero: 'Masculino',
-            email: 'juan.perez@autogest.com',
-            alias: '@juan_ajustador',
-            avatar: 'JP',
-            ultimoAcceso: '06 de marzo de 2024, 10:30 hrs'
-        };
+// ========== VERIFICAR SESIÓN AL CARGAR ==========
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log("🔍 Cargando perfil...");
+    
+    try {
+        const response = await fetch('/BDM_Proyect/Public/api/verificar_sesion.php');
+        const data = await response.json();
+        
+        console.log("Respuesta:", data);
+        
+        if (!data.ok) {
+            window.location.href = '/BDM_Proyect/Public/views/Login.php';
+            return;
+        }
+        
+        currentUser = data;
+        cargarDatosPerfil();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        window.location.href = '/BDM_Proyect/Public/views/Login.php';
+    }
+});
 
-        // Inicializar perfil
-        function initProfile() {
-            // Header
-            document.getElementById('userNameDisplay').textContent = currentUser.nombre;
-            document.getElementById('userRoleDisplay').textContent = 
-                currentUser.type === 'supervisor' ? 'Supervisor' :
-                currentUser.type === 'ajustador' ? 'Ajustador' : 'Asegurado';
-            document.getElementById('userAvatar').textContent = currentUser.avatar;
+function cargarDatosPerfil() {
+    if (!currentUser) return;
+    
+    console.log("Cargando datos del perfil...");
+    
+    // HEADER
+    const nombreMostrar = currentUser.alias || currentUser.nombre || 'Usuario';
+    const rolTexto = currentUser.rol === 'ajustador' ? 'Ajustador' :
+                     currentUser.rol === 'supervisor' ? 'Supervisor' : 'Asegurado';
+    const inicial = (currentUser.nombre || 'U').charAt(0).toUpperCase();
+    
+    const userNameSpan = document.getElementById('userNameDisplay');
+    const userRoleSpan = document.getElementById('userRoleDisplay');
+    const userAvatarSpan = document.getElementById('userAvatar');
+    
+    if (userNameSpan) userNameSpan.textContent = nombreMostrar;
+    if (userRoleSpan) userRoleSpan.textContent = rolTexto;
+    if (userAvatarSpan) userAvatarSpan.textContent = inicial;
+    
+    // PERFIL - CABECERA
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileName = document.getElementById('profileName');
+    const profileAlias = document.getElementById('profileAlias');
+    
+    if (profileAvatar) profileAvatar.textContent = inicial;
+    if (profileName) profileName.textContent = currentUser.nombre || 'Usuario';
+    if (profileAlias) profileAlias.textContent = currentUser.alias || '@usuario';
+    
+    // INFORMACIÓN PERSONAL
+    const displayNombre = document.getElementById('displayNombre');
+    const displayApellidos = document.getElementById('displayApellidos');
+    const displayFechaNac = document.getElementById('displayFechaNac');
+    const displayGenero = document.getElementById('displayGenero');
+    const displayEmail = document.getElementById('displayEmail');
+    const displayAlias = document.getElementById('displayAlias');
+    const lastAccess = document.querySelector('.last-access');
+    
+    if (displayNombre) displayNombre.textContent = currentUser.nombre || 'No registrado';
+    if (displayApellidos) displayApellidos.textContent = currentUser.apellidos || 'No registrado';
+    
+    if (displayFechaNac) {
+        if (currentUser.fecha_nacimiento) {
+            const fecha = new Date(currentUser.fecha_nacimiento);
+            displayFechaNac.textContent = fecha.toLocaleDateString('es-MX');
+        } else {
+            displayFechaNac.textContent = 'No registrado';
+        }
+    }
+    
+    if (displayGenero) {
+        if (currentUser.genero === 1 || currentUser.genero === '1') {
+            displayGenero.textContent = 'Masculino';
+        } else if (currentUser.genero === 0 || currentUser.genero === '0') {
+            displayGenero.textContent = 'Femenino';
+        } else {
+            displayGenero.textContent = currentUser.genero || 'No registrado';
+        }
+    }
+    
+    if (displayEmail) displayEmail.textContent = currentUser.email || 'No registrado';
+    if (displayAlias) displayAlias.textContent = currentUser.alias || '@usuario';
+    if (lastAccess) lastAccess.textContent = `Último acceso: ${new Date().toLocaleString()}`;
+}
+
+// ========== FUNCIONES DE NAVEGACIÓN ==========
+function irDashboard() {
+    window.location.href = '/BDM_Proyect/Public/views/index.php';
+}
+
+function showNotifications() {
+    alert('📢 Notificaciones: No hay notificaciones nuevas');
+}
+
+function irPerfil() {
+    console.log('Ya en perfil');
+}
+
+// ========== MODALES ==========
+function mostrarModalLogout() {
+    const modal = document.getElementById('logoutModal');
+    if (modal) modal.classList.add('active');
+}
+
+function cerrarModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove('active');
+}
+
+async function cerrarSesion() {
+    try {
+        const response = await fetch('/BDM_Proyect/logout.php');
+        const data = await response.json();
+        
+        // Redirigir al login sin importar la respuesta
+        window.location.href = '/BDM_Proyect/Public/views/Login.php';
+        
+    } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+        // Si hay error, igual redirigir
+        window.location.href = '/BDM_Proyect/Public/views/Login.php';
+    }
+}
+
+// ========== CAMBIAR CONTRASEÑA REAL ==========
+function cambiarContrasena() {
+    // Abrir el modal de cambio de contraseña
+    const modal = document.getElementById('passwordModal');
+    if (modal) {
+        // Limpiar campos anteriores
+        const passActual = document.getElementById('passActual');
+        const passNueva = document.getElementById('passNueva');
+        const passConfirmar = document.getElementById('passConfirmar');
+        const mensajeDiv = document.getElementById('passMensaje');
+        
+        if (passActual) passActual.value = '';
+        if (passNueva) passNueva.value = '';
+        if (passConfirmar) passConfirmar.value = '';
+        if (mensajeDiv) mensajeDiv.style.display = 'none';
+        
+        modal.classList.add('active');
+    } else {
+        alert('Funcionalidad en desarrollo');
+    }
+}
+
+async function cambiarContrasenaReal() {
+    console.log("cambiarContrasenaReal ejecutándose...");
+    
+    const passActual = document.getElementById('passActual');
+    const passNueva = document.getElementById('passNueva');
+    const passConfirmar = document.getElementById('passConfirmar');
+    const mensajeDiv = document.getElementById('passMensaje');
+    
+    if (!passActual || !passNueva || !passConfirmar) {
+        console.error("No se encontraron los campos del formulario");
+        alert("Error: No se encontró el formulario");
+        return;
+    }
+    
+    const passActualVal = passActual.value;
+    const passNuevaVal = passNueva.value;
+    const passConfirmarVal = passConfirmar.value;
+    
+    // Validar campos
+    if (!passActualVal || !passNuevaVal || !passConfirmarVal) {
+        mensajeDiv.style.display = 'block';
+        mensajeDiv.style.background = '#ffebee';
+        mensajeDiv.style.color = '#c62828';
+        mensajeDiv.innerHTML = '❌ Todos los campos son obligatorios';
+        return;
+    }
+    
+    // Validar longitud nueva contraseña
+    if (passNuevaVal.length < 8) {
+        mensajeDiv.style.display = 'block';
+        mensajeDiv.style.background = '#ffebee';
+        mensajeDiv.style.color = '#c62828';
+        mensajeDiv.innerHTML = '❌ La nueva contraseña debe tener al menos 8 caracteres';
+        return;
+    }
+    
+    // Validar que coincidan
+    if (passNuevaVal !== passConfirmarVal) {
+        mensajeDiv.style.display = 'block';
+        mensajeDiv.style.background = '#ffebee';
+        mensajeDiv.style.color = '#c62828';
+        mensajeDiv.innerHTML = '❌ Las contraseñas nuevas no coinciden';
+        return;
+    }
+    
+    // Mostrar loading
+    const btn = document.querySelector('#passwordModal .btn-primary');
+    const textoOriginal = btn ? btn.textContent : 'Cambiar Contraseña';
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Procesando...';
+    }
+    mensajeDiv.style.display = 'none';
+    
+    try {
+        const response = await fetch('/BDM_Proyect/Public/api/cambiar_password.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                password_actual: passActualVal,
+                password_nueva: passNuevaVal
+            })
+        });
+        
+        const result = await response.json();
+        
+        mensajeDiv.style.display = 'block';
+        
+        if (result.ok) {
+            mensajeDiv.style.background = '#e8f5e8';
+            mensajeDiv.style.color = '#2e7d32';
+            mensajeDiv.innerHTML = '✅ ' + result.mensaje;
             
-            // Perfil
-            document.getElementById('profileAvatar').textContent = currentUser.avatar;
-            document.getElementById('profileName').textContent = currentUser.nombreCompleto;
-            document.getElementById('profileAlias').textContent = currentUser.alias;
+            // Limpiar campos
+            passActual.value = '';
+            passNueva.value = '';
+            passConfirmar.value = '';
             
-            // Datos de registro
-            document.getElementById('displayNombre').textContent = currentUser.nombreCompleto;
-            document.getElementById('displayApellidos').textContent = currentUser.apellidos;
-            document.getElementById('displayFechaNac').textContent = currentUser.fechaNacimiento;
-            document.getElementById('displayGenero').textContent = currentUser.genero;
-            document.getElementById('displayEmail').textContent = currentUser.email;
-            document.getElementById('displayAlias').textContent = currentUser.alias;
-            
-            // Último acceso
-            document.querySelector('.last-access').textContent = `Último acceso: ${currentUser.ultimoAcceso}`;
-        }
-
-        // ========== FUNCIONES DE NAVEGACIÓN ==========
-        function irDashboard() {
-            if (currentUser.type === 'ajustador') {
-                window.location.href = 'dashboard_ajustador.html';
-            } else if (currentUser.type === 'supervisor') {
-                window.location.href = 'dashboard_supervisor.html';
-            } else {
-                window.location.href = 'dashboard_asegurado.html';
-            }
-        }
-
-        function irPerfil() {
-            // Ya estamos en perfil
-            console.log('Ya en perfil');
-        }
-
-        function showNotifications() {
-            alert('Mostrando notificaciones');
-        }
-
-        function cambiarContrasena() {
-            document.getElementById('passwordModal').classList.add('active');
-        }
-
-        // ========== FUNCIONES DE CIERRE DE SESIÓN ==========
-        function mostrarModalLogout() {
-            document.getElementById('logoutModal').classList.add('active');
-        }
-
-        function cerrarModal(modalId) {
-            if (modalId) {
-                document.getElementById(modalId).classList.remove('active');
-            } else {
-                document.getElementById('logoutModal').classList.remove('active');
-            }
-        }
-
-        function cerrarSesion() {
-            alert('Cerrando sesión...');
-            // Simular cierre de sesión
+            // Cerrar modal después de 2 segundos
             setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 1500);
+                cerrarModal('passwordModal');
+            }, 2000);
+        } else {
+            mensajeDiv.style.background = '#ffebee';
+            mensajeDiv.style.color = '#c62828';
+            mensajeDiv.innerHTML = '❌ ' + result.mensaje;
         }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        mensajeDiv.style.display = 'block';
+        mensajeDiv.style.background = '#ffebee';
+        mensajeDiv.style.color = '#c62828';
+        mensajeDiv.innerHTML = '❌ Error de conexión con el servidor';
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = textoOriginal;
+        }
+    }
+}
 
-        // ========== INICIALIZACIÓN ==========
-        document.addEventListener('DOMContentLoaded', initProfile);
+function irDashboard() {
+    window.location.href = '/BDM_Proyect/Public/views/index.php';
+}

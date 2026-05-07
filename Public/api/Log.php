@@ -3,12 +3,11 @@
 error_reporting(E_ALL);
 ini_set('display_errors',1);
 
-// srry te cambie casi todo xd
 require_once __DIR__ . '/../classes/Autenticacion.php';
 
 header("Content-Type: application/json");
 
-// solamente POST papi
+// solamente POST
 if($_SERVER['REQUEST_METHOD'] !== 'POST'){
     echo json_encode([
         'ok' => false,
@@ -29,78 +28,24 @@ if(!$data){
     exit;
 }
 
-// validat campos
+// validar campos
 if(empty($data['email']) || empty($data['password']) || empty($data['tipoUsuario'])){
     echo json_encode([
         'ok' => false,
         'mensaje' => 'Todos los campos son obligatorios'
     ]);
     exit;
-} 
+}
 
-// Procesame el login
+// Procesar el login
 $auth = new Autenticacion();
-$resultado = $auth->login($data['email'],$data['password'],$data['tipoUsuario']);
+$resultado = $auth->login($data['email'], $data['password'], $data['tipoUsuario']);
+
+// Si el login fue exitoso, asegurarnos que la sesión tenga todos los datos necesarios
+if ($resultado['ok'] && isset($_SESSION['usuario'])) {
+    // Aquí podemos agregar más datos a la sesión si es necesario
+    // pero la clase Autenticacion ya debería hacerlo
+}
 
 echo json_encode($resultado);
-
-
-// DEJO COMENTADO TODO POR SI LO REQUERIMOS ALGÚN DIA
-// require_once __DIR__ . "/../classes/DB.php";
-
-// // Limpiar cualquier salida anterior
-// ob_clean();
-
-// // Mostrar errores directamente en la pantalla
-// ini_set('display_errors', 1);
-// error_reporting(E_ALL);
-
-// header("Content-Type: application/json");
-
-// $data = json_decode(file_get_contents("php://input"), true);
-
-// // Si no hay datos, mostrar error simple
-// if (!$data) {
-//     echo json_encode(['ok' => false, 'mensaje' => 'No se recibieron datos']);
-//     exit;
-// }
-
-// // Verificar que la clase DB existe
-// if (!class_exists('DB')) {
-//     echo json_encode(['ok' => false, 'mensaje' => 'Clase DB no encontrada']);
-//     exit;
-// }
-
-// try {
-//     $db = new DB();
-    
-//     // Probar conexión con una consulta simple
-//     $testQuery = $db->query("SELECT 1 as test");
-    
-//     if (empty($testQuery)) {
-//         echo json_encode(['ok' => false, 'mensaje' => 'Error de conexión a la base de datos']);
-//         exit;
-//     }
-    
-//     // Consultar usuario
-//     $sql = "SELECT ID_Usuario, Correo, Contra FROM usuario WHERE Correo = :email LIMIT 1";
-//     $result = $db->query($sql, [':email' => $data['email']]);
-    
-//     if (empty($result)) {
-//         echo json_encode(['ok' => false, 'mensaje' => 'Usuario no encontrado: ' . $data['email']]);
-//         exit;
-//     }
-    
-//     $usuario = $result[0];
-    
-//     echo json_encode([
-//         'ok' => true, 
-//         'mensaje' => 'Usuario encontrado',
-//         'correo' => $usuario['Correo'],
-//         'password_length' => strlen($usuario['Contra'])
-//     ]);
-    
-// } catch (Exception $e) {
-//     echo json_encode(['ok' => false, 'mensaje' => 'Excepción: ' . $e->getMessage()]);
-// }
 ?>
