@@ -9,12 +9,12 @@
                 <span>🔔</span>
             </div>
 
-            <div class="user-info" onclick="goToLogin()">
+            <div class="user-info" onclick="irPerfil()">
                 <div class="user-details">
-                    <div class="user-name" id="userNameDisplay">Juan Pérez</div>
-                    <div class="user-role" id="userRoleDisplay">Supervisor</div>
+                    <div class="user-name" id="userNameDisplay"></div>
+                    <div class="user-role" id="userRoleDisplay"></div>
                 </div>
-                <div class="avatar" id="userAvatar">JP</div>
+                <div class="avatar" id="userAvatar"></div>
             </div>
 
             

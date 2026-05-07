@@ -253,5 +253,5 @@ async function cambiarContrasenaReal() {
 }
 
 function irDashboard() {
-    window.location.href = '/BDM_Proyect/Public/views/index.php';
+    window.location.href = '/BDM_PROYECT/index.php';
 }

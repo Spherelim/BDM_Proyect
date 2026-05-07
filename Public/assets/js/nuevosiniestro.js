@@ -410,6 +410,7 @@
         }
 
         function irDashboard() {
+            // Mau: Creo... que tienes que quitar esto
             window.location.href = 'dashboard_ajustador.html';
         }
 

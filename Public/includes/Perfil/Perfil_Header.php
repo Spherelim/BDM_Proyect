@@ -1,5 +1,18 @@
-<div class="profile-header">
-    <div class="profile-avatar-large" id="profileAvatar">Cargando...</div>
-    <div class="profile-name" id="profileName">Cargando...</div>
-    <div class="profile-alias" id="profileAlias">@cargando</div>
-</div>
+<header class="header">
+    <div class="logo" onclick="irDashboard()" style="cursor: pointer;">
+        <h1>AutoGest Seguros</h1>
+        <span>Mi Perfil</span>
+    </div>
+    <div class="user-menu">
+        <div class="notifications" onclick="showNotifications()">
+            <span>🔔</span>
+        </div>
+        <div class="user-info" onclick="toggleUserMenu()" style="cursor: pointer;">
+            <div class="user-details">
+                <div class="user-name" id="userNameDisplay">Cargando...</div>
+                <div class="user-role" id="userRoleDisplay"></div>
+            </div>
+            <div class="avatar" id="userAvatar"></div>
+        </div>
+    </div>
+</header>

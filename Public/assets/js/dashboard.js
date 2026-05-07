@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         if (!data.ok) {
             console.log("No hay sesión, redirigiendo a login...");
-            window.location.href = 'login.html';
+            window.location.href = 'Public/views/login.php';
             return;
         }
         
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         
     } catch (error) {
         console.error('Error al verificar sesión:', error);
-        window.location.href = 'login.html';
+        window.location.href = 'Public/views/login.php';
     }
 });
 
@@ -243,6 +243,7 @@ function limpiarBusqueda() {
 }
 
 function verDetalle(id) {
+    //Mau: oye pero ya tienes un Modal para mostrar el detalle del siniestro xd
     window.location.href = `detalle_siniestro.html?id=${id}`;
 }
 
