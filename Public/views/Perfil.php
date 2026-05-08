@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="../assets/style/perfil.css">
 </head>
 <body>
+
+    <!-- MODAL DE EDICIÓN DE PERFIL -->
+    <?php include '../includes/Perfil/Modal_EditProfile.php' ?>
+
     <!-- HEADER DE NAVEGACIÓN (similar al dashboard) -->
     <?php include '../includes/Perfil/Perfil_Header.php' ?>
 

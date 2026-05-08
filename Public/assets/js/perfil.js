@@ -67,8 +67,24 @@ function cargarDatosPerfil() {
     
     if (displayFechaNac) {
         if (currentUser.fecha_nacimiento) {
-            const fecha = new Date(currentUser.fecha_nacimiento);
-            displayFechaNac.textContent = fecha.toLocaleDateString('es-MX');
+            // CORRECCIÓN: Parsear la fecha manualmente para evitar problemas de zona horaria
+            const fechaStr = currentUser.fecha_nacimiento; // Ejemplo: "2004-12-06"
+            
+            // Dividir la fecha en partes
+            const partes = fechaStr.split('-');
+            const year = parseInt(partes[0]);
+            const month = parseInt(partes[1]) - 1; // Los meses en JS van de 0-11
+            const day = parseInt(partes[2]);
+            
+            // Crear fecha local (sin desplazamiento UTC)
+            const fecha = new Date(year, month, day);
+            
+            // Formatear como DD/MM/YYYY
+            displayFechaNac.textContent = fecha.toLocaleDateString('es-MX', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
         } else {
             displayFechaNac.textContent = 'No registrado';
         }
@@ -87,6 +103,146 @@ function cargarDatosPerfil() {
     if (displayEmail) displayEmail.textContent = currentUser.email || 'No registrado';
     if (displayAlias) displayAlias.textContent = currentUser.alias || '@usuario';
     if (lastAccess) lastAccess.textContent = `Último acceso: ${new Date().toLocaleString()}`;
+}
+
+// ========== EDITAR PERFIL ==========
+function abrirModalEditarPerfil() {
+    if (!currentUser) {
+        alert('No se pudo cargar la información del usuario');
+        return;
+    }
+    
+    // Llenar el formulario con los datos actuales
+    document.getElementById('editNombre').value = currentUser.nombre || '';
+    document.getElementById('editApellidos').value = currentUser.apellidos || '';
+    
+    // Formatear fecha para el input date
+    if (currentUser.fecha_nacimiento) {
+    // La fecha ya viene en formato YYYY-MM-DD, solo asegurarnos
+    const fechaStr = currentUser.fecha_nacimiento;
+    
+    // Si tiene formato YYYY-MM-DD, usarlo directamente
+    if (fechaStr.includes('-') && fechaStr.length >= 10) {
+        document.getElementById('editFechaNac').value = fechaStr.substring(0, 10);
+    } else {
+        // Si es otro formato, parsear
+        const partes = fechaStr.split('-');
+        const year = partes[0];
+        const month = partes[1].padStart(2, '0');
+        const day = partes[2].padStart(2, '0');
+        document.getElementById('editFechaNac').value = `${year}-${month}-${day}`;
+    }
+    } else {
+        document.getElementById('editFechaNac').value = '';
+    }
+    
+    document.getElementById('editGenero').value = currentUser.genero || '1';
+    document.getElementById('editAlias').value = currentUser.alias || '';
+    
+    // Limpiar mensaje anterior
+    const mensaje = document.getElementById('editProfileMessage');
+    mensaje.className = 'form-message';
+    mensaje.style.display = 'none';
+    
+    // Mostrar modal
+    document.getElementById('editProfileModal').classList.add('active');
+}
+
+function cerrarModalEditProfile() {
+    document.getElementById('editProfileModal').classList.remove('active');
+}
+
+// Cerrar modal al hacer clic fuera del contenido
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('editProfileModal');
+    if (event.target === modal) {
+        cerrarModalEditProfile();
+    }
+});
+
+async function guardarPerfil(event) {
+    event.preventDefault();
+    
+    const btnSave = document.getElementById('btnSaveProfile');
+    const mensajeDiv = document.getElementById('editProfileMessage');
+    
+    const datos = {
+        nombre: document.getElementById('editNombre').value.trim(),
+        apellidos: document.getElementById('editApellidos').value.trim(),
+        fecha_nacimiento: document.getElementById('editFechaNac').value,
+        genero: parseInt(document.getElementById('editGenero').value),
+        alias: document.getElementById('editAlias').value.trim()
+    };
+    
+    // Validar campos obligatorios
+    if (!datos.nombre || !datos.apellidos || !datos.fecha_nacimiento) {
+        mostrarMensajeEdicion('❌ Todos los campos marcados con * son obligatorios', 'error');
+        return;
+    }
+    
+    // Validar fecha
+    const fechaNac = new Date(datos.fecha_nacimiento);
+    const hoy = new Date();
+    if (fechaNac >= hoy) {
+        mostrarMensajeEdicion('❌ La fecha de nacimiento debe ser anterior a hoy', 'error');
+        return;
+    }
+    
+    // Deshabilitar botón y mostrar loading
+    btnSave.disabled = true;
+    btnSave.innerHTML = '<span>⏳</span> Guardando...';
+    
+    try {
+        const response = await fetch('../api/actualizar_perfil.php', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datos)
+        });
+        
+        const result = await response.json();
+        
+        if (result.ok) {
+            mostrarMensajeEdicion('✅ ' + result.mensaje, 'success');
+            
+            // Actualizar datos en memoria
+            currentUser.nombre = datos.nombre;
+            currentUser.apellidos = datos.apellidos;
+            currentUser.fecha_nacimiento = datos.fecha_nacimiento;
+            currentUser.genero = datos.genero;
+            currentUser.alias = datos.alias || currentUser.alias;
+            
+            // Recargar UI completa
+            cargarDatosPerfil();
+            
+            // Cerrar modal después de 1.5 segundos
+            setTimeout(() => {
+                cerrarModalEditProfile();
+                // Limpiar mensaje para la próxima apertura
+                mensajeDiv.className = 'form-message';
+                mensajeDiv.style.display = 'none';
+            }, 1500);
+            
+        } else {
+            mostrarMensajeEdicion('❌ ' + result.mensaje, 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error al actualizar perfil:', error);
+        mostrarMensajeEdicion('❌ Error de conexión con el servidor', 'error');
+    } finally {
+        // Restaurar botón
+        btnSave.disabled = false;
+        btnSave.innerHTML = '<span>💾</span> Guardar Cambios';
+    }
+}
+
+function mostrarMensajeEdicion(mensaje, tipo) {
+    const mensajeDiv = document.getElementById('editProfileMessage');
+    mensajeDiv.style.display = 'block';
+    mensajeDiv.textContent = mensaje;
+    mensajeDiv.className = 'form-message ' + tipo;
 }
 
 // ========== FUNCIONES DE NAVEGACIÓN ==========
