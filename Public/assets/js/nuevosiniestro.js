@@ -372,43 +372,36 @@ document.addEventListener('click', function(event) {
         }
 
         function agregarVehiculo() {
-            const id = Date.now();
-            vehiculos.push(id);
-            
-            const html = `
-                <div class="vehicle-card" id="vehiculo-${id}">
-                    <div class="remove-vehicle" onclick="eliminarVehiculo(${id})">✕</div>
-                    <h4>
-                        <span>🚗</span>
-                        Vehículo ${vehiculos.length}
-                    </h4>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Marca/Modelo</label>
-                            <input type="text" placeholder="Ej: Chevrolet Aveo">
-                        </div>
-                        <div class="form-group">
-                            <label>Placas</label>
-                            <input type="text" placeholder="ABC-123">
-                        </div>
-                        <div class="form-group">
-                            <label>Color</label>
-                            <input type="text" placeholder="Rojo">
-                        </div>
-                        <div class="form-group">
-                            <label>Aseguradora</label>
-                            <input type="text" placeholder="Seguros MX">
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Daños aparentes</label>
-                            <textarea placeholder="Describa los daños del otro vehículo..."></textarea>
-                        </div>
-                    </div>
+    const id = Date.now();
+    vehiculos.push(id);
+    
+    const html = `
+        <div class="vehicle-card" id="vehiculo-${id}">
+            <div class="remove-vehicle" onclick="eliminarVehiculo(${id})">✕</div>
+            <h4><span>🚗</span> Vehículo ${vehiculos.length}</h4>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Marca/Modelo</label>
+                    <input type="text" placeholder="Ej: Chevrolet Aveo" class="vh-marca">
                 </div>
-            `;
-            
-            document.getElementById('vehiculosList').insertAdjacentHTML('beforeend', html);
-        }
+                <div class="form-group">
+                    <label>Placas</label>
+                    <input type="text" placeholder="ABC-123" class="vh-placas">
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <input type="text" placeholder="Rojo" class="vh-color">
+                </div>
+                <div class="form-group full-width">
+                    <label>Daños aparentes</label>
+                    <textarea placeholder="Describa los daños..." class="vh-danios"></textarea>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('vehiculosList').insertAdjacentHTML('beforeend', html);
+}
 
         function eliminarVehiculo(id) {
             document.getElementById(`vehiculo-${id}`).remove();
@@ -562,26 +555,31 @@ function formatFileSize(bytes) {
     formData.append('lesionados', document.getElementById('lesionados').value);
     formData.append('autoridades', document.getElementById('autoridades').value);
     
-    // Unidades terceras como JSON
-    const vehiculosData = [];
-    document.querySelectorAll('.vehicle-card').forEach(card => {
-        const inputs = card.querySelectorAll('input, textarea');
-        if (inputs.length >= 5) {
-            vehiculosData.push({
-                marca_modelo: inputs[0]?.value || '',
-                placas: inputs[1]?.value || '',
-                color: inputs[2]?.value || '',
-                id_seguro: document.getElementById('companiaSeguros').value || 1,
-                danios: inputs[4]?.value || ''
-            });
-        }
-    });
-    formData.append('vehiculos', JSON.stringify(vehiculosData));
+    // Unidades terceras como JSON - CORREGIDO
+const vehiculosData = [];
+document.querySelectorAll('.vehicle-card').forEach(card => {
+    const marca = card.querySelector('.vh-marca')?.value || '';
+    const placas = card.querySelector('.vh-placas')?.value || '';
+    const color = card.querySelector('.vh-color')?.value || '';
+    const danios = card.querySelector('.vh-danios')?.value || '';
+    const seguro = document.getElementById('companiaSeguros')?.value || '1';
+    
+    if (marca || placas) { // Solo agregar si tiene datos
+        vehiculosData.push({
+            marca_modelo: marca,
+            placas: placas,
+            color: color,
+            danios: danios,
+            id_seguro: parseInt(seguro)
+        });
+    }
+});
+formData.append('vehiculos', JSON.stringify(vehiculosData));
     
     // Paso 4: Archivos
-    archivosSeleccionados.forEach(file => {
-        formData.append('archivos[]', file);
-    });
+    // archivosSeleccionados.forEach(file => {
+    //     formData.append('archivos[]', file);
+    // });
 
     try {
         // cambiar cuando arregle el SP
