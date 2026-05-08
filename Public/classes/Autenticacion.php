@@ -52,15 +52,16 @@
 
                 // cambiar a SP
                 // PRIMERO: Insertar en persona
-                $sqlPersona = "INSERT INTO persona (Nombre, Apellido, FechaNac, Genero, Alias) 
-                            VALUES (:nombre, :apellido, :fecha_nacimiento, :genero, :alias)";
+                $sqlPersona = "INSERT INTO persona (Nombre, Apellido, FechaNac, Genero, Alias, Foto) 
+               VALUES (:nombre, :apellido, :fecha_nacimiento, :genero, :alias, :foto)";                
                 
                 $paramsPersona = [
                     ':nombre' => $datos['nombre'],
                     ':apellido' => $datos['apellidos'],
                     ':fecha_nacimiento' => $datos['fechaNacimiento'],
                     ':genero' => $genero,
-                    ':alias' => $datos['alias']
+                    ':alias' => $datos['alias'],
+                    ':foto' => $datos['foto'] ?? null  // NUEVO
                 ];
 
                 $idPersona = $this->db->query($sqlPersona, $paramsPersona);
@@ -92,6 +93,62 @@
                 ];
             }
         }
+
+        // Buscar usuario sin especificar tipo
+    public function loginSinTipo($email, $password) {
+        try {
+            // Buscar usuario por email (sin filtrar por rol)
+            $sql = "SELECT u.ID_Usuario, p.Nombre, p.Apellido, p.Alias, 
+                    u.Correo, u.Contra, p.Genero, p.Foto, p.FechaNac,
+                    r.Nombre AS Nombre_Rol
+                FROM usuario u
+                INNER JOIN rol r ON u.id_rol = r.ID_Rol
+                INNER JOIN persona p ON u.id_persona = p.ID_Persona
+                WHERE u.Correo = :email
+                AND u.Activo = 1
+                LIMIT 1";
+
+            $usuario = $this->db->getRow($sql, [
+                ':email' => $email
+            ]);
+
+            if (!$usuario) {
+                return [
+                    'ok' => false,
+                    'mensaje' => 'Usuario no encontrado'
+                ];
+            }
+
+            // Verificar contraseña
+            if (!password_verify($password, $usuario['Contra'])) {
+                return [
+                    'ok' => false,
+                    'mensaje' => 'Contraseña incorrecta'
+                ];
+            }
+
+            // Iniciar sesión
+            $this->iniciarSesion($usuario);
+
+            return [
+                'ok' => true,
+                'mensaje' => '¡Bienvenido ' . $usuario['Nombre'] . '!',
+                'usuario' => [
+                    'id' => $usuario['ID_Usuario'],
+                    'nombre' => $usuario['Nombre'],
+                    'alias' => $usuario['Alias'],
+                    'rol' => $usuario['Nombre_Rol']
+                ]
+            ];
+
+        } catch (Exception $e) {
+            error_log("Error en login: " . $e->getMessage());
+            return [
+                'ok' => false,
+                'mensaje' => 'Error al iniciar sesión'
+            ];
+        }
+    }
 
         // no ves? o no ubicas que es Ingresar
         public function login($email,$password,$tipoUsuario){

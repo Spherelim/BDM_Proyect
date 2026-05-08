@@ -179,6 +179,10 @@ function validatePasswordMatch() {
     if (password && confirm) {
         if (password === confirm) {
             confirmInput.classList.remove('error');
+            // ¡CORRECCIÓN! No desactivar isPasswordValid si coinciden
+            if (password.length >= 8) {
+                isPasswordValid = true;
+            }
         } else {
             confirmInput.classList.add('error');
             isPasswordValid = false;
@@ -197,12 +201,11 @@ function toggleRegisterButton() {
     const password = document.getElementById('regPassword').value;
     const confirmPassword = document.getElementById('regConfirmPassword').value;
     const ageVerified = document.getElementById('ageVerification').checked;
-    const tieneFoto = fotoSeleccionada !== null;
-    
+        
     const allFields = nombre && apellidos && genero && email && alias && 
                      password && confirmPassword && selectedUserType && 
                      isAgeValid && isPasswordValid && isEmailValid && 
-                     ageVerified && tieneFoto;
+                     ageVerified;
     
     const btn = document.getElementById('registerBtn');
     if (btn) btn.disabled = !allFields;
@@ -276,7 +279,6 @@ function toggleRegisterButton() {
 // }
 
 async function handleRegister() {
-
     console.log("Entrando en Registro.");
 
     const btn = document.getElementById('registerBtn');
@@ -284,26 +286,29 @@ async function handleRegister() {
 
     btn.disabled = true;
     btn.textContent = 'Registrando...';
-
-    const userData = {
-        tipoUsuario: selectedUserType,
-        nombre: document.getElementById('regNombre').value.trim(),
-        apellidos: document.getElementById('regApellidos').value.trim(),
-        fechaNacimiento: document.getElementById('regFechaNacimiento').value,
-        genero: document.getElementById('regGenero').value,
-        email: document.getElementById('regEmail').value.trim(),
-        alias: document.getElementById('regAlias').value.trim(),
-        password: document.getElementById('regPassword').value
-    };
+    
+    // Usar FormData para enviar la foto
+    const formData = new FormData();
+    formData.append('tipoUsuario', selectedUserType);
+    formData.append('nombre', document.getElementById('regNombre').value.trim());
+    formData.append('apellidos', document.getElementById('regApellidos').value.trim());
+    formData.append('fechaNacimiento', document.getElementById('regFechaNacimiento').value);
+    formData.append('genero', document.getElementById('regGenero').value);
+    formData.append('email', document.getElementById('regEmail').value.trim());
+    formData.append('alias', document.getElementById('regAlias').value.trim());
+    formData.append('password', document.getElementById('regPassword').value);
+    
+    // Agregar foto si existe
+    if (fotoSeleccionada) {
+        formData.append('foto', fotoSeleccionada);
+    }
 
     try {
-
         console.log("Dentro del Try Catch");
 
-        const response = await fetch('/BDM_PROYECT/Public/api/register.php', {
+        const response = await fetch('/BDM_Proyect/Public/api/register.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData)
+            body: formData  // No usar JSON, usar FormData
         });
 
         const result = await response.json();
@@ -402,26 +407,13 @@ async function handleRegister() {
 // }
 
 async function handleLogin() {
-
     console.log("Entro en Log");
 
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
 
-    console.log("Comprobando Datos...");
     if (!email || !password) {
         showMessage('❌ Completa todos los campos');
-        return;
-    }
-
-    console.log("Agarrando Tipo de Usuario.");
-    let tipoUsuario = document.getElementById('loginUserType')?.value;
-    
-    console.log("Comprobando Tipo de Usuario...");
-    if (!tipoUsuario) {
-        // Crear selector si no existe
-        crearSelectorTipoUsuario();
-        showMessage('❌ Selecciona el tipo de usuario');
         return;
     }
 
@@ -429,17 +421,14 @@ async function handleLogin() {
     loginBtn.disabled = true;
     loginBtn.textContent = 'Iniciando...';
 
-    console.log("Entrando en try Catch");
     try {
-        console.log("Dentro de try Catch");
-
-        const response = await fetch('/BDM_PROYECT/Public/api/Log.php', {
+        const response = await fetch('/BDM_Proyect/Public/api/Log.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: email,
-                password: password,
-                tipoUsuario: tipoUsuario
+                password: password
+                // Sin tipoUsuario - el backend lo detecta
             })
         });
 
@@ -448,7 +437,7 @@ async function handleLogin() {
         if (result.ok) {
             showMessage(result.mensaje, false);
             setTimeout(() => {
-                window.location.href = '/BDM_PROYECT/index.php';
+                window.location.href = '/BDM_Proyect/index.php';
             }, 1500);
         } else {
             showMessage('ERROR: ' + result.mensaje);

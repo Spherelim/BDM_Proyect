@@ -41,7 +41,18 @@ function actualizarHeader() {
     
     document.getElementById('userNameDisplay').textContent = nombreMostrar;
     document.getElementById('userRoleDisplay').textContent = rolTexto;
-    document.getElementById('userAvatar').textContent = inicial;
+    
+    // Avatar con foto o inicial
+    const userAvatar = document.getElementById('userAvatar');
+    if (userAvatar) {
+        if (currentUser.foto) {
+            userAvatar.innerHTML = `<img src="${currentUser.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+            userAvatar.style.background = 'none';
+        } else {
+            userAvatar.textContent = inicial;
+            userAvatar.style.background = 'linear-gradient(135deg, #ffd700, #ffaa00)';
+        }
+    }
 }
 
 function mostrarBienvenida() {

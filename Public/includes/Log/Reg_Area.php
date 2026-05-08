@@ -56,7 +56,7 @@
 
                     <!-- Foto de perfil -->
                     <div class="form-group">
-                        <label>Foto de perfil <span class="required">*</span></label>
+                        <label>Foto de perfil <span style="color: #888">(opcional)</span></label>
                         <div class="photo-upload" onclick="document.getElementById('fotoInput').click()">
                             <i>📷</i>
                             <span>Haz clic para subir una foto</span>
