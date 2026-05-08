@@ -67,8 +67,24 @@ function cargarDatosPerfil() {
     
     if (displayFechaNac) {
         if (currentUser.fecha_nacimiento) {
-            const fecha = new Date(currentUser.fecha_nacimiento);
-            displayFechaNac.textContent = fecha.toLocaleDateString('es-MX');
+            // CORRECCIÓN: Parsear la fecha manualmente para evitar problemas de zona horaria
+            const fechaStr = currentUser.fecha_nacimiento; // Ejemplo: "2004-12-06"
+            
+            // Dividir la fecha en partes
+            const partes = fechaStr.split('-');
+            const year = parseInt(partes[0]);
+            const month = parseInt(partes[1]) - 1; // Los meses en JS van de 0-11
+            const day = parseInt(partes[2]);
+            
+            // Crear fecha local (sin desplazamiento UTC)
+            const fecha = new Date(year, month, day);
+            
+            // Formatear como DD/MM/YYYY
+            displayFechaNac.textContent = fecha.toLocaleDateString('es-MX', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
         } else {
             displayFechaNac.textContent = 'No registrado';
         }
@@ -102,9 +118,20 @@ function abrirModalEditarPerfil() {
     
     // Formatear fecha para el input date
     if (currentUser.fecha_nacimiento) {
-        const fecha = new Date(currentUser.fecha_nacimiento);
-        const fechaFormateada = fecha.toISOString().split('T')[0];
-        document.getElementById('editFechaNac').value = fechaFormateada;
+    // La fecha ya viene en formato YYYY-MM-DD, solo asegurarnos
+    const fechaStr = currentUser.fecha_nacimiento;
+    
+    // Si tiene formato YYYY-MM-DD, usarlo directamente
+    if (fechaStr.includes('-') && fechaStr.length >= 10) {
+        document.getElementById('editFechaNac').value = fechaStr.substring(0, 10);
+    } else {
+        // Si es otro formato, parsear
+        const partes = fechaStr.split('-');
+        const year = partes[0];
+        const month = partes[1].padStart(2, '0');
+        const day = partes[2].padStart(2, '0');
+        document.getElementById('editFechaNac').value = `${year}-${month}-${day}`;
+    }
     } else {
         document.getElementById('editFechaNac').value = '';
     }
