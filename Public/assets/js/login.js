@@ -407,26 +407,13 @@ async function handleRegister() {
 // }
 
 async function handleLogin() {
-
     console.log("Entro en Log");
 
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
 
-    console.log("Comprobando Datos...");
     if (!email || !password) {
         showMessage('❌ Completa todos los campos');
-        return;
-    }
-
-    console.log("Agarrando Tipo de Usuario.");
-    let tipoUsuario = document.getElementById('loginUserType')?.value;
-    
-    console.log("Comprobando Tipo de Usuario...");
-    if (!tipoUsuario) {
-        // Crear selector si no existe
-        crearSelectorTipoUsuario();
-        showMessage('❌ Selecciona el tipo de usuario');
         return;
     }
 
@@ -434,17 +421,14 @@ async function handleLogin() {
     loginBtn.disabled = true;
     loginBtn.textContent = 'Iniciando...';
 
-    console.log("Entrando en try Catch");
     try {
-        console.log("Dentro de try Catch");
-
-        const response = await fetch('/BDM_PROYECT/Public/api/Log.php', {
+        const response = await fetch('/BDM_Proyect/Public/api/Log.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: email,
-                password: password,
-                tipoUsuario: tipoUsuario
+                password: password
+                // Sin tipoUsuario - el backend lo detecta
             })
         });
 
@@ -453,7 +437,7 @@ async function handleLogin() {
         if (result.ok) {
             showMessage(result.mensaje, false);
             setTimeout(() => {
-                window.location.href = '/BDM_PROYECT/index.php';
+                window.location.href = '/BDM_Proyect/index.php';
             }, 1500);
         } else {
             showMessage('ERROR: ' + result.mensaje);
