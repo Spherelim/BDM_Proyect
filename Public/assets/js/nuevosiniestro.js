@@ -577,9 +577,9 @@ document.querySelectorAll('.vehicle-card').forEach(card => {
 formData.append('vehiculos', JSON.stringify(vehiculosData));
     
     // Paso 4: Archivos
-    // archivosSeleccionados.forEach(file => {
-    //     formData.append('archivos[]', file);
-    // });
+            archivosSeleccionados.forEach(file => {
+            formData.append('archivos[]', file);
+        });
 
     try {
         // cambiar cuando arregle el SP
