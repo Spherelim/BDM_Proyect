@@ -35,7 +35,7 @@ try {
     $ajustador_id = $_SESSION['usuario']['id'];
     
     // 1. Insertar persona
-    $stmt = $pdo->prepare("INSERT INTO persona (Nombre, Apellido, RFC, Telefono, Direccion, FechaNac, Genero) VALUES (?, '', ?, ?, ?, '2000-01-01', 1)");
+    $stmt = $pdo->prepare("INSERT INTO persona (Nombre, Apellido, RFC, Telefono, Direccion) VALUES (?, '', ?, ?, ?)");
     $stmt->execute([$nombre, $rfc, $tel, $dir]);
     $persona_id = $pdo->lastInsertId();
     

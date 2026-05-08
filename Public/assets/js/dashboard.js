@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log("🔍 Verificando sesión...");
     
     try {
+
+        cargarCompaniasDashboard();
+        
         const response = await fetch('Public/api/verificar_sesion.php');
         const data = await response.json();
         
@@ -30,6 +33,26 @@ document.addEventListener('DOMContentLoaded', async function() {
         window.location.href = 'Public/views/login.php';
     }
 });
+
+// Cargar compañías para el buscador
+async function cargarCompaniasDashboard() {
+    try {
+        const response = await fetch('Public/api/obtener_companias.php');
+        const data = await response.json();
+        
+        if (data.ok && data.companias) {
+            const select = document.getElementById('companiaSeguros');
+            if (select) {
+                select.innerHTML = '<option value="">Todas las compañías</option>';
+                data.companias.forEach(compania => {
+                    select.innerHTML += `<option value="${compania.Nombre_Empresa}">${compania.Nombre_Empresa}</option>`;
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error cargando compañías:', error);
+    }
+}
 
 function actualizarHeader() {
     if (!currentUser) return;
@@ -263,13 +286,113 @@ function limpiarBusqueda() {
 }
 
 function verDetalle(id) {
-    //Mau: oye pero ya tienes un Modal para mostrar el detalle del siniestro xd
-    window.location.href = `detalle_siniestro.html?id=${id}`;
+    const siniestro = siniestrosReales.find(s => s.id == id);
+    if (!siniestro) {
+        alert('Siniestro no encontrado');
+        return;
+    }
+    
+    const modal = document.getElementById('detalleModal');
+    const content = document.getElementById('detalleContent');
+    const detalleId = document.getElementById('detalleId');
+    
+    detalleId.textContent = '#' + (siniestro.folio || siniestro.id);
+    
+    content.innerHTML = `
+        <div style="display: grid; gap: 1.5rem;">
+            <!-- Info principal -->
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 15px;">
+                <h4 style="color: #003366; margin-bottom: 1rem;">📋 Información General</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <strong style="color: #666;">Folio:</strong>
+                        <p>${siniestro.folio || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <strong style="color: #666;">Estado:</strong>
+                        <p>${siniestro.estado || 'Pendiente'}</p>
+                    </div>
+                    <div>
+                        <strong style="color: #666;">Fecha:</strong>
+                        <p>📅 ${formatFecha(siniestro.fecha_siniestro)}</p>
+                    </div>
+                    <div>
+                        <strong style="color: #666;">Ubicación:</strong>
+                        <p>📍 ${siniestro.ubicacion || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cliente -->
+            <div style="background: #e8f0fe; padding: 1.5rem; border-radius: 15px;">
+                <h4 style="color: #003366; margin-bottom: 1rem;">👤 Cliente</h4>
+                <p><strong>Nombre:</strong> ${siniestro.cliente_nombre || 'N/A'}</p>
+                ${siniestro.cliente_alias ? `<p><strong>Alias:</strong> ${siniestro.cliente_alias}</p>` : ''}
+            </div>
+            
+            <!-- Vehículo -->
+            <div style="background: #fff3e0; padding: 1.5rem; border-radius: 15px;">
+                <h4 style="color: #003366; margin-bottom: 1rem;">🚗 Vehículo</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <strong style="color: #666;">Vehículo:</strong>
+                        <p>${siniestro.vehiculo || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <strong style="color: #666;">Placas:</strong>
+                        <p>${siniestro.placas || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <strong style="color: #666;">Serie:</strong>
+                        <p>${siniestro.serie || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <strong style="color: #666;">Combustible:</strong>
+                        <p>${siniestro.combustible || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Siniestro -->
+            <div style="background: #fce4ec; padding: 1.5rem; border-radius: 15px;">
+                <h4 style="color: #003366; margin-bottom: 1rem;">⚠️ Siniestro</h4>
+                <p><strong>Tipo:</strong> ${siniestro.tipo || 'N/A'}</p>
+                <p><strong>Descripción:</strong> ${siniestro.descripcion || 'Sin descripción'}</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <strong style="color: #666;">Lesionados:</strong>
+                        <p>${siniestro.lesionados || 'No'}</p>
+                    </div>
+                    <div>
+                        <strong style="color: #666;">Autoridades:</strong>
+                        <p>${siniestro.autoridades || 'No'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ajustador -->
+            <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 15px;">
+                <h4 style="color: #003366; margin-bottom: 1rem;">🔧 Ajustador</h4>
+                <p><strong>Nombre:</strong> ${siniestro.ajustador_nombre || 'N/A'}</p>
+                ${siniestro.ajustador_alias ? `<p><strong>Alias:</strong> ${siniestro.ajustador_alias}</p>` : ''}
+            </div>
+        </div>
+    `;
+    
+    modal.classList.add('active');
 }
 
 function cerrarModal() {
     document.getElementById('detalleModal').classList.remove('active');
 }
+
+// Cerrar modal al hacer clic fuera
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('detalleModal');
+    if (event.target === modal) {
+        cerrarModal();
+    }
+});
 
 function getEstadoClass(estado) {
     const classes = {
