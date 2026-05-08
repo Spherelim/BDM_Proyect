@@ -208,38 +208,47 @@ function mostrarError(mensaje) {
     `;
 }
 
-function buscarSiniestros() {
-    if (!siniestrosReales.length) return;
+async function buscarSiniestros() {
+    console.log("🔍 Ejecutando búsqueda...");
     
-    const fechaInicio = document.getElementById('fechaInicio')?.value;
-    const fechaFin = document.getElementById('fechaFin')?.value;
-    const compania = document.getElementById('companiaSeguros')?.value;
-    const poliza = document.getElementById('numPoliza')?.value;
-    const vehiculo = document.getElementById('vehiculo')?.value;
-    const cliente = document.getElementById('cliente')?.value;
-    const estado = document.getElementById('estadoSiniestro')?.value;
+    const fechaInicio = document.getElementById('fechaInicio')?.value || null;
+    const fechaFin = document.getElementById('fechaFin')?.value || null;
+    const compania = document.getElementById('companiaSeguros')?.value || null;
+    const poliza = document.getElementById('numPoliza')?.value || null;
+    const vehiculo = document.getElementById('vehiculo')?.value || null;
+    const cliente = document.getElementById('cliente')?.value || null;
+    const estado = document.getElementById('estadoSiniestro')?.value || null;
     
-    let resultados = [...siniestrosReales];
+    const container = document.getElementById('siniestrosContainer');
+    container.innerHTML = `<div style="text-align:center; padding:3rem;">⏳ Buscando siniestros...</div>`;
     
-    if (fechaInicio) resultados = resultados.filter(s => s.fecha_siniestro >= fechaInicio);
-    if (fechaFin) resultados = resultados.filter(s => s.fecha_siniestro <= fechaFin);
-    if (compania) resultados = resultados.filter(s => s.compania === compania);
-    if (poliza) resultados = resultados.filter(s => s.num_poliza && s.num_poliza.includes(poliza));
-    if (vehiculo) {
-        const term = vehiculo.toLowerCase();
-        resultados = resultados.filter(s => 
-            (s.placas && s.placas.toLowerCase().includes(term)) ||
-            (s.serie && s.serie.toLowerCase().includes(term))
-        );
+    try {
+        const response = await fetch('Public/api/buscar_siniestros.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fecha_inicio: fechaInicio,
+                fecha_fin: fechaFin,
+                compania: compania,
+                poliza: poliza,
+                vehiculo: vehiculo,
+                cliente: cliente,
+                estado: estado
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.ok) {
+            console.log("Siniestros encontrados:", data.siniestros.length);
+            mostrarResultados(data.siniestros);
+        } else {
+            container.innerHTML = `<div style="text-align:center; padding:3rem; color:#c62828;">❌ ${data.mensaje}</div>`;
+        }
+    } catch (error) {
+        console.error('Error en búsqueda:', error);
+        container.innerHTML = `<div style="text-align:center; padding:3rem; color:#c62828;">❌ Error de conexión con el servidor</div>`;
     }
-    if (cliente) {
-        resultados = resultados.filter(s => 
-            s.cliente_nombre && s.cliente_nombre.toLowerCase().includes(cliente.toLowerCase())
-        );
-    }
-    if (estado) resultados = resultados.filter(s => s.estado === estado);
-    
-    mostrarResultados(resultados);
 }
 
 function limpiarBusqueda() {
