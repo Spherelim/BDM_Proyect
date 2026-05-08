@@ -179,6 +179,10 @@ function validatePasswordMatch() {
     if (password && confirm) {
         if (password === confirm) {
             confirmInput.classList.remove('error');
+            // ¡CORRECCIÓN! No desactivar isPasswordValid si coinciden
+            if (password.length >= 8) {
+                isPasswordValid = true;
+            }
         } else {
             confirmInput.classList.add('error');
             isPasswordValid = false;
