@@ -1,22 +1,167 @@
-
-        // ========== CONFIGURACIÓN INICIAL ==========
+// ========== CONFIGURACIÓN INICIAL ==========
         let pasoActual = 1;
         let archivosSeleccionados = [];
         let vehiculos = [];
 
-        // Datos del usuario (simulado)
-        const currentUser = {
-            type: 'ajustador',
-            name: 'Juan Pérez',
-            alias: 'Juan',
-            id: 'AJU001'
-        };
+// Cargar compañías de seguros desde la BD
+async function cargarCompanias() {
+    try {
+        const response = await fetch('../api/obtener_companias.php');
+        const data = await response.json();
+        
+        if (data.ok && data.companias) {
+            const select = document.getElementById('companiaSeguros');
+            select.innerHTML = '<option value="">Seleccionar compañía</option>';
+            
+            data.companias.forEach(compania => {
+                select.innerHTML += `<option value="${compania.ID_Seguro}">${compania.Nombre_Empresa}</option>`;
+            });
+        }
+    } catch (error) {
+        console.error('Error cargando compañías:', error);
+    }
+}
 
-        // Actualizar información del usuario
-        document.getElementById('userNameDisplay').textContent = currentUser.name;
-        document.getElementById('userRoleDisplay').textContent = 
-            currentUser.type === 'ajustador' ? 'Ajustador' : 'Supervisor';
-        document.getElementById('userAvatar').textContent = currentUser.avatar || 'JP';
+// ========== VERIFICAR SESIÓN Y CARGAR HEADER ==========
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const response = await fetch('/BDM_Proyect/Public/api/verificar_sesion.php');
+        const data = await response.json();
+        
+        if (!data.ok) {
+            window.location.href = '/BDM_Proyect/Public/views/Login.php';
+            return;
+        }
+        
+        // Actualizar header con datos reales
+        const nombreMostrar = data.alias || data.nombre || 'Usuario';
+        const rolTexto = data.rol === 'ajustador' ? 'Ajustador' :
+                         data.rol === 'supervisor' ? 'Supervisor' : 'Asegurado';
+        const inicial = (data.nombre || 'U').charAt(0).toUpperCase();
+        
+        document.getElementById('userNameDisplay').textContent = nombreMostrar;
+        document.getElementById('userRoleDisplay').textContent = rolTexto;
+        
+        const avatar = document.getElementById('userAvatar');
+        if (data.foto) {
+            avatar.innerHTML = `<img src="${data.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+            avatar.style.background = 'none';
+        } else {
+            avatar.textContent = inicial;
+        }
+        
+        // Guardar datos para el envío
+        window.userData = data;
+        
+    } catch (error) {
+        console.error('Error:', error);
+    }
+    
+    cargarCompanias();
+
+    // Fecha actual para el siniestro
+    const ahora = new Date();
+    const año = ahora.getFullYear();
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    const hora = String(ahora.getHours()).padStart(2, '0');
+    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+    
+    const fechaInput = document.getElementById('fechaSiniestro');
+    if (fechaInput) {
+        fechaInput.value = `${año}-${mes}-${dia}T${hora}:${minutos}`;
+    }
+});
+
+// ========== BÚSQUEDA DE PERSONAS ==========
+let timeoutBusqueda = null;
+
+async function buscarPersona() {
+    const termino = document.getElementById('nombreCliente').value.trim();
+    const container = document.getElementById('sugerenciasContainer');
+    
+    if (timeoutBusqueda) clearTimeout(timeoutBusqueda);
+    
+    if (termino.length < 3) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    timeoutBusqueda = setTimeout(async () => {
+        try {
+            const response = await fetch(`../api/buscar_persona.php?q=${encodeURIComponent(termino)}`);
+            
+            // Verificar que la respuesta sea JSON
+            const text = await response.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('Respuesta no es JSON:', text);
+                return;
+            }
+            
+            if (data.ok && data.personas && data.personas.length > 0) {
+                let html = '';
+                data.personas.forEach(persona => {
+                    html += `
+                        <div onclick='seleccionarPersona(
+                            "${persona.Nombre.replace(/"/g, '\\"')}", 
+                            "${persona.Apellido.replace(/"/g, '\\"')}", 
+                            "${persona.RFC || ''}", 
+                            "${persona.Telefono || ''}", 
+                            "${persona.Correo || ''}", 
+                            "${persona.Direccion || ''}"
+                        )' 
+                             style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;"
+                             onmouseover="this.style.background='#e8f0fe'" 
+                             onmouseout="this.style.background='white'">
+                            <div style="font-weight: 600; color: #003366;">📋 ${persona.nombre_completo}</div>
+                            ${persona.Correo ? `<div style="font-size: 0.85rem; color: #666;">📧 ${persona.Correo}</div>` : ''}
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+                container.style.display = 'block';
+            } else {
+                container.innerHTML = `
+                    <div style="padding: 15px; text-align: center; color: #888;">
+                        ✨ Se creará nuevo registro
+                    </div>
+                `;
+                container.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }, 400);
+}
+
+function seleccionarPersona(nombre, apellido, rfc, telefono, correo, direccion) {
+    document.getElementById('nombreCliente').value = nombre + ' ' + apellido;
+    document.getElementById('rfc').value = rfc || '';
+    document.getElementById('telefono').value = telefono || '';
+    document.getElementById('email').value = correo || '';
+    document.getElementById('direccion').value = direccion || '';
+    
+    document.getElementById('sugerenciasContainer').style.display = 'none';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Cerrar sugerencias al hacer clic fuera
+document.addEventListener('click', function(event) {
+    const container = document.getElementById('sugerenciasContainer');
+    const input = document.getElementById('nombreCliente');
+    
+    if (container && input && event.target !== input && !container.contains(event.target)) {
+        container.style.display = 'none';
+    }
+});
 
         // ========== FUNCIONES DE NAVEGACIÓN ==========
         function cambiarPaso(direccion) {
@@ -77,21 +222,14 @@
         }
 
         function validarPaso1() {
-            const tipoCliente = document.getElementById('tipoCliente').value;
             const nombre = document.getElementById('nombreCliente').value;
-            const razonSocial = document.getElementById('razonSocial').value;
             const rfc = document.getElementById('rfc').value;
             const telefono = document.getElementById('telefono').value;
             const email = document.getElementById('email').value;
             const direccion = document.getElementById('direccion').value;
 
-            if (tipoCliente === 'persona' && !nombre) {
+            if (!nombre) {
                 alert('Por favor ingresa el nombre del cliente');
-                return false;
-            }
-
-            if (tipoCliente === 'moral' && !razonSocial) {
-                alert('Por favor ingresa la razón social');
                 return false;
             }
 
@@ -147,8 +285,8 @@
                 return false;
             }
 
-            if (!anio) {
-                alert('Por favor selecciona el año del vehículo');
+            if (!anio || anio < 1900 || anio > 2099) {
+                alert('Por favor ingresa un año válido (Ej: 2024)');
                 return false;
             }
 
@@ -277,42 +415,94 @@
             vehiculos = vehiculos.filter(v => v !== id);
         }
 
-        // ========== FUNCIONES DE ARCHIVOS ==========
-        function handleFileSelect(event) {
-            const files = Array.from(event.target.files);
-            
-            files.forEach(file => {
-                if (file.size > 50 * 1024 * 1024) {
-                    alert(`El archivo ${file.name} excede los 50MB`);
-                    return;
-                }
-                
-                archivosSeleccionados.push(file);
-                agregarArchivoALista(file);
-            });
+        // ========== FUNCIONES DE ARCHIVOS MEJORADAS ==========
+function handleFileSelect(event) {
+    const files = Array.from(event.target.files);
+    
+    files.forEach(file => {
+        if (file.size > 50 * 1024 * 1024) {
+            alert(`El archivo ${file.name} excede los 50MB`);
+            return;
         }
+        
+        archivosSeleccionados.push(file);
+        agregarArchivoALista(file);
+    });
+}
 
-        function agregarArchivoALista(file) {
-            const fileList = document.getElementById('fileList');
-            const size = (file.size / 1024 / 1024).toFixed(2);
-            const icon = file.type.startsWith('image/') ? '📷' : '🎥';
-            
-            const html = `
-                <div class="file-item" id="file-${file.name}">
-                    <div class="remove-file" onclick="eliminarArchivo('${file.name}')">✕</div>
-                    <i>${icon}</i>
-                    <div class="file-name">${file.name}</div>
-                    <div class="file-size">${size} MB</div>
+function agregarArchivoALista(file) {
+    const fileList = document.getElementById('fileList');
+    const size = formatFileSize(file.size);
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+    
+    const id = 'file-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    
+    const fileItem = document.createElement('div');
+    fileItem.className = 'file-item';
+    fileItem.id = id;
+    
+    if (isImage) {
+        // Crear miniatura para imágenes
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            fileItem.innerHTML = `
+                <div class="remove-file" onclick="eliminarArchivo('${id}', '${file.name}')">✕</div>
+                <div class="file-preview">
+                    <img src="${e.target.result}" alt="${file.name}">
+                </div>
+                <div class="file-info">
+                    <div class="file-name" title="${file.name}">${file.name}</div>
+                    <div class="file-size">📷 ${size}</div>
                 </div>
             `;
-            
-            fileList.insertAdjacentHTML('beforeend', html);
-        }
+        };
+        reader.readAsDataURL(file);
+    } else if (isVideo) {
+        // Crear preview para videos
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            fileItem.innerHTML = `
+                <div class="remove-file" onclick="eliminarArchivo('${id}', '${file.name}')">✕</div>
+                <div class="file-preview video-preview">
+                    <div class="video-placeholder">
+                        <span>🎥</span>
+                    </div>
+                </div>
+                <div class="file-info">
+                    <div class="file-name" title="${file.name}">${file.name}</div>
+                    <div class="file-size">🎬 ${size}</div>
+                </div>
+            `;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        // Otro tipo de archivo
+        fileItem.innerHTML = `
+            <div class="remove-file" onclick="eliminarArchivo('${id}', '${file.name}')">✕</div>
+            <div class="file-preview document-preview">
+                <span>📄</span>
+            </div>
+            <div class="file-info">
+                <div class="file-name" title="${file.name}">${file.name}</div>
+                <div class="file-size">📁 ${size}</div>
+            </div>
+        `;
+    }
+    
+    fileList.appendChild(fileItem);
+}
 
-        function eliminarArchivo(fileName) {
-            document.getElementById(`file-${fileName}`).remove();
-            archivosSeleccionados = archivosSeleccionados.filter(f => f.name !== fileName);
-        }
+function eliminarArchivo(id, fileName) {
+    document.getElementById(id)?.remove();
+    archivosSeleccionados = archivosSeleccionados.filter(f => f.name !== fileName);
+}
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
 
         // ========== FUNCIONES DE UBICACIÓN ==========
         function obtenerUbicacionActual() {
@@ -334,58 +524,88 @@
         }
 
         // ========== FUNCIÓN DE ENVÍO ==========
-        function enviarSiniestro() {
-            if (!document.getElementById('terminos').checked) {
-                alert('Debes confirmar que la información es verídica');
-                return;
-            }
+        async function enviarSiniestro() {
+    if (!document.getElementById('terminos').checked) {
+        alert('Debes confirmar que la información es verídica');
+        return;
+    }
 
-            // Recopilar datos del formulario
-            const datosSiniestro = {
-                folio: 'SN-2024-' + Math.floor(Math.random() * 1000),
-                fechaRegistro: new Date().toISOString(),
-                ajustador: currentUser,
-                cliente: {
-                    tipo: document.getElementById('tipoCliente').value,
-                    nombre: document.getElementById('nombreCliente').value,
-                    razonSocial: document.getElementById('razonSocial').value,
-                    rfc: document.getElementById('rfc').value,
-                    telefono: document.getElementById('telefono').value,
-                    email: document.getElementById('email').value,
-                    direccion: document.getElementById('direccion').value
-                },
-                vehiculo: {
-                    compania: document.getElementById('companiaSeguros').value,
-                    poliza: document.getElementById('numPoliza').value,
-                    marca: document.getElementById('marca').value,
-                    modelo: document.getElementById('modelo').value,
-                    anio: document.getElementById('anio').value,
-                    placas: document.getElementById('placas').value,
-                    serie: document.getElementById('serie').value,
-                    color: document.getElementById('color').value,
-                    combustible: document.getElementById('combustible').value,
-                    kilometraje: document.getElementById('kilometraje').value
-                },
-                siniestro: {
-                    fecha: document.getElementById('fechaSiniestro').value,
-                    tipo: document.getElementById('tipoSiniestro').value,
-                    ubicacion: document.getElementById('ubicacion').value,
-                    descripcion: document.getElementById('descripcion').value,
-                    otrasUnidades: document.getElementById('otrasUnidades').value,
-                    lesionados: document.getElementById('lesionados').value,
-                    autoridades: document.getElementById('autoridades').value
-                },
-                multimedia: {
-                    archivos: archivosSeleccionados.map(f => f.name)
-                }
-            };
+    const btn = document.getElementById('btnEnviar');
+    btn.disabled = true;
+    btn.textContent = 'Registrando...';
 
-            console.log('Siniestro registrado:', datosSiniestro);
-            
-            // Mostrar modal de confirmación
-            document.getElementById('folioGenerado').textContent = datosSiniestro.folio;
-            document.getElementById('confirmModal').classList.add('active');
+    const formData = new FormData();
+    
+    // Paso 1: Datos del cliente
+    formData.append('nombre_cliente', document.getElementById('nombreCliente').value);
+    formData.append('rfc', document.getElementById('rfc').value);
+    formData.append('telefono', document.getElementById('telefono').value);
+    formData.append('email', document.getElementById('email').value);
+    formData.append('direccion', document.getElementById('direccion').value);
+    
+    // Paso 2: Vehículo
+    formData.append('compania_id', document.getElementById('companiaSeguros').value);
+    formData.append('num_poliza', document.getElementById('numPoliza').value);
+    formData.append('marca', document.getElementById('marca').value);
+    formData.append('modelo', document.getElementById('modelo').value);
+    formData.append('anio', document.getElementById('anio').value);
+    formData.append('placas', document.getElementById('placas').value);
+    formData.append('serie', document.getElementById('serie').value);
+    formData.append('color', document.getElementById('color').value);
+    formData.append('combustible', document.getElementById('combustible').value);
+    
+    // Paso 3: Siniestro
+    formData.append('fecha_siniestro', document.getElementById('fechaSiniestro').value.replace('T', ' '));
+    formData.append('tipo_siniestro', document.getElementById('tipoSiniestro').value);
+    formData.append('ubicacion', document.getElementById('ubicacion').value);
+    formData.append('descripcion', document.getElementById('descripcion').value);
+    formData.append('lesionados', document.getElementById('lesionados').value);
+    formData.append('autoridades', document.getElementById('autoridades').value);
+    
+    // Unidades terceras como JSON
+    const vehiculosData = [];
+    document.querySelectorAll('.vehicle-card').forEach(card => {
+        const inputs = card.querySelectorAll('input, textarea');
+        if (inputs.length >= 5) {
+            vehiculosData.push({
+                marca_modelo: inputs[0]?.value || '',
+                placas: inputs[1]?.value || '',
+                color: inputs[2]?.value || '',
+                id_seguro: document.getElementById('companiaSeguros').value || 1,
+                danios: inputs[4]?.value || ''
+            });
         }
+    });
+    formData.append('vehiculos', JSON.stringify(vehiculosData));
+    
+    // Paso 4: Archivos
+    archivosSeleccionados.forEach(file => {
+        formData.append('archivos[]', file);
+    });
+
+    try {
+        // cambiar cuando arregle el SP
+        const response = await fetch('../api/crear_siniestro.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.ok) {
+            document.getElementById('folioGenerado').textContent = result.siniestro?.Folio || result.siniestro?.Nombre;
+            document.getElementById('confirmModal').classList.add('active');
+        } else {
+            alert('Error: ' + (result.mensaje || 'Error desconocido'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión con el servidor');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Registrar Siniestro';
+    }
+}
 
         function toggleSubmitButton() {
             const terminos = document.getElementById('terminos').checked;
@@ -411,7 +631,7 @@
 
         function irDashboard() {
             // Mau: Creo... que tienes que quitar esto
-            window.location.href = 'dashboard_ajustador.html';
+            window.location.href = '../../index.php';
         }
 
         // Inicializar

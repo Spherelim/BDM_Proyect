@@ -14,13 +14,13 @@
                         <label>Tipo de siniestro <span class="required">*</span></label>
                         <select id="tipoSiniestro">
                             <option value="">Seleccionar tipo</option>
-                            <option value="choque">Choque</option>
-                            <option value="volcadura">Volcadura</option>
+                            <option value="Choque">Choque</option>
+                            <option value="Volcadura">Volcadura</option>
                             <option value="incendio">Incendio</option>
-                            <option value="robo">Robo</option>
-                            <option value="impacto">Impacto contra objeto fijo</option>
-                            <option value="fenomeno">Fenómeno natural</option>
-                            <option value="vandalismo">Vandalismo</option>
+                            <option value="Robo">Robo</option>
+                            <option value="Impacto contra objeto fijo">Impacto contra objeto fijo</option>
+                            <option value="Fenómeno natural">Fenómeno natural</option>
+                            <option value="Vandalismo">Vandalismo</option>
                             <option value="otro">Otro</option>
                         </select>
                     </div>
@@ -56,7 +56,7 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label>¿Hubo autoridades presentes?</label>
                         <select id="autoridades">
                             <option value="no">No</option>
@@ -64,7 +64,16 @@
                             <option value="transito">Tránsito</option>
                             <option value="fiscalia">Fiscalía</option>
                         </select>
+                    </div> -->
+
+                    <div class="form-group">
+                        <label>¿Hubo autoridades presentes?</label>
+                        <select id="autoridades">
+                            <option value="no">No</option>
+                            <option value="si">Sí</option>
+                        </select>
                     </div>
+
                 </div>
 
                 <!-- Sección de otras unidades involucradas (dinámica) -->
