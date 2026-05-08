@@ -32,6 +32,11 @@
             </div>
             
             <div class="form-group">
+                <label for="editEmail">Correo electrónico *</label>
+                <input type="email" id="editEmail" placeholder="tu@email.com" required>
+            </div>
+            
+            <div class="form-group">
                 <label for="editAlias">Alias (opcional)</label>
                 <input type="text" id="editAlias" placeholder="@usuario">
             </div>

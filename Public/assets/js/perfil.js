@@ -118,25 +118,16 @@ function abrirModalEditarPerfil() {
     
     // Formatear fecha para el input date
     if (currentUser.fecha_nacimiento) {
-    // La fecha ya viene en formato YYYY-MM-DD, solo asegurarnos
-    const fechaStr = currentUser.fecha_nacimiento;
-    
-    // Si tiene formato YYYY-MM-DD, usarlo directamente
-    if (fechaStr.includes('-') && fechaStr.length >= 10) {
-        document.getElementById('editFechaNac').value = fechaStr.substring(0, 10);
-    } else {
-        // Si es otro formato, parsear
-        const partes = fechaStr.split('-');
-        const year = partes[0];
-        const month = partes[1].padStart(2, '0');
-        const day = partes[2].padStart(2, '0');
-        document.getElementById('editFechaNac').value = `${year}-${month}-${day}`;
-    }
+        const fechaStr = currentUser.fecha_nacimiento;
+        if (fechaStr.includes('-') && fechaStr.length >= 10) {
+            document.getElementById('editFechaNac').value = fechaStr.substring(0, 10);
+        }
     } else {
         document.getElementById('editFechaNac').value = '';
     }
     
     document.getElementById('editGenero').value = currentUser.genero || '1';
+    document.getElementById('editEmail').value = currentUser.email || '';
     document.getElementById('editAlias').value = currentUser.alias || '';
     
     // Limpiar mensaje anterior
@@ -171,12 +162,20 @@ async function guardarPerfil(event) {
         apellidos: document.getElementById('editApellidos').value.trim(),
         fecha_nacimiento: document.getElementById('editFechaNac').value,
         genero: parseInt(document.getElementById('editGenero').value),
+        email: document.getElementById('editEmail').value.trim(),
         alias: document.getElementById('editAlias').value.trim()
     };
     
     // Validar campos obligatorios
-    if (!datos.nombre || !datos.apellidos || !datos.fecha_nacimiento) {
-        mostrarMensajeEdicion('❌ Todos los campos marcados con * son obligatorios', 'error');
+    if (!datos.nombre || !datos.apellidos || !datos.fecha_nacimiento || !datos.email) {
+        mostrarMensajeEdicion('❌ Todos los campos con * son obligatorios', 'error');
+        return;
+    }
+    
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(datos.email)) {
+        mostrarMensajeEdicion('❌ El correo electrónico no es válido', 'error');
         return;
     }
     
@@ -204,13 +203,14 @@ async function guardarPerfil(event) {
         const result = await response.json();
         
         if (result.ok) {
-            mostrarMensajeEdicion('✅ ' + result.mensaje, 'success');
+            mostrarMensajeEdicion(result.mensaje, 'success');
             
             // Actualizar datos en memoria
             currentUser.nombre = datos.nombre;
             currentUser.apellidos = datos.apellidos;
             currentUser.fecha_nacimiento = datos.fecha_nacimiento;
             currentUser.genero = datos.genero;
+            currentUser.email = datos.email;
             currentUser.alias = datos.alias || currentUser.alias;
             
             // Recargar UI completa
@@ -219,7 +219,6 @@ async function guardarPerfil(event) {
             // Cerrar modal después de 1.5 segundos
             setTimeout(() => {
                 cerrarModalEditProfile();
-                // Limpiar mensaje para la próxima apertura
                 mensajeDiv.className = 'form-message';
                 mensajeDiv.style.display = 'none';
             }, 1500);
@@ -232,7 +231,6 @@ async function guardarPerfil(event) {
         console.error('Error al actualizar perfil:', error);
         mostrarMensajeEdicion('❌ Error de conexión con el servidor', 'error');
     } finally {
-        // Restaurar botón
         btnSave.disabled = false;
         btnSave.innerHTML = '<span>💾</span> Guardar Cambios';
     }
