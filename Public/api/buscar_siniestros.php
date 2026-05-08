@@ -11,14 +11,9 @@ if (!isset($_SESSION['usuario'])) {
 
 $usuario = $_SESSION['usuario'];
 $rol = $usuario['rol'];
-$usuarioId = $usuario['id'];
+$nombreUsuario = $usuario['nombre'] . ' ' . ($usuario['apellidos'] ?? '');
 
 $data = json_decode(file_get_contents("php://input"), true);
-
-if (!$data) {
-    echo json_encode(['ok' => false, 'mensaje' => 'No se recibieron datos']);
-    exit;
-}
 
 $fecha_inicio = $data['fecha_inicio'] ?? null;
 $fecha_fin = $data['fecha_fin'] ?? null;
@@ -30,43 +25,60 @@ $estado = $data['estado'] ?? null;
 
 $db = new DB();
 
-// Construir consulta con las columnas que SÍ existen en v_siniestros
 $sql = "SELECT 
-            siniestro, Folio, HoraSiniestro, Ubicacion, Alta, 
-            Modificación, EstadoDelSiniestro, NumeroPolisa, Seguro, 
-            Telefono_Emergencia, Asegurado, AliasAsegurado, Telefono, Correo,
-            Ajustador, AliasAjustador, TelefonoAjustador, TipoSiniestro, 
-            Descripcion, Lesionados, AutoridadesPresentes, UnidadDelAsegurado, 
-            PlacaAsegurado, Serie, Tipo_Combus
+            ID_Siniestro as id,
+            siniestro,
+            Folio as folio,
+            HoraSiniestro as fecha_siniestro,
+            EstadoDelSiniestro as estado,
+            Asegurado as cliente_nombre,
+            AliasAsegurado as cliente_alias,
+            UnidadDelAsegurado as vehiculo,
+            PlacaAsegurado as placas,
+            Serie as serie,
+            Seguro as compania,
+            Ajustador as ajustador_nombre,
+            TipoSiniestro as tipo
         FROM v_siniestros WHERE 1=1";
 
 $params = [];
 
+// 🔥 FILTRAR POR ROL (igual que en siniestros.php)
+if ($rol === 'ajustador') {
+    $sql .= " AND Ajustador LIKE :ajustador_nombre";
+    $params[':ajustador_nombre'] = '%' . $nombreUsuario . '%';
+} elseif ($rol === 'asegurado') {
+    $sql .= " AND Asegurado LIKE :asegurado_nombre";
+    $params[':asegurado_nombre'] = '%' . $nombreUsuario . '%';
+}
+
+// Filtros de búsqueda
 if ($fecha_inicio && $fecha_fin) {
     $sql .= " AND HoraSiniestro BETWEEN :fecha_inicio AND :fecha_fin";
     $params[':fecha_inicio'] = $fecha_inicio;
-    $params[':fecha_fin'] = $fecha_fin;
+    $params[':fecha_fin'] = $fecha_fin . ' 23:59:59';
 } elseif ($fecha_inicio) {
     $sql .= " AND HoraSiniestro >= :fecha_inicio";
     $params[':fecha_inicio'] = $fecha_inicio;
 } elseif ($fecha_fin) {
     $sql .= " AND HoraSiniestro <= :fecha_fin";
-    $params[':fecha_fin'] = $fecha_fin;
+    $params[':fecha_fin'] = $fecha_fin . ' 23:59:59';
 }
 
 if ($compania) {
-    $sql .= " AND Seguro = :compania";
-    $params[':compania'] = $compania;
+    $sql .= " AND Seguro LIKE :compania";
+    $params[':compania'] = "%$compania%";
 }
 
 if ($poliza) {
-    $sql .= " AND NumeroPolisa LIKE :poliza";
+    $sql .= " AND CAST(NumeroPolisa AS CHAR) LIKE :poliza";
     $params[':poliza'] = "%$poliza%";
 }
 
 if ($vehiculo) {
-    $sql .= " AND (PlacaAsegurado LIKE :vehiculo OR Serie LIKE :vehiculo)";
+    $sql .= " AND (PlacaAsegurado LIKE :vehiculo OR Serie LIKE :vehiculo2)";
     $params[':vehiculo'] = "%$vehiculo%";
+    $params[':vehiculo2'] = "%$vehiculo%";
 }
 
 if ($cliente) {
@@ -79,14 +91,7 @@ if ($estado) {
     $params[':estado'] = $estado;
 }
 
-// Filtrar por rol
-if ($rol == 'ajustador') {
-    $sql .= " AND Ajustador = :ajustador_nombre";
-    $params[':ajustador_nombre'] = $usuario['nombre'];
-} elseif ($rol == 'asegurado') {
-    $sql .= " AND Asegurado = :asegurado_nombre";
-    $params[':asegurado_nombre'] = $usuario['nombre'];
-}
+$sql .= " ORDER BY HoraSiniestro DESC LIMIT 50";
 
 try {
     $result = $db->query($sql, $params);
@@ -94,4 +99,3 @@ try {
 } catch (Exception $e) {
     echo json_encode(['ok' => false, 'mensaje' => $e->getMessage()]);
 }
-?>
