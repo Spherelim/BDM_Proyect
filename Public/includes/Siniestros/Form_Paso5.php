@@ -22,10 +22,4 @@
                     </label>
                 </div>
 
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="notificar">
-                        <span>Notificar al cliente por email sobre el registro del siniestro</span>
-                    </label>
-                </div>
             </div>
