@@ -52,15 +52,16 @@
 
                 // cambiar a SP
                 // PRIMERO: Insertar en persona
-                $sqlPersona = "INSERT INTO persona (Nombre, Apellido, FechaNac, Genero, Alias) 
-                            VALUES (:nombre, :apellido, :fecha_nacimiento, :genero, :alias)";
+                $sqlPersona = "INSERT INTO persona (Nombre, Apellido, FechaNac, Genero, Alias, Foto) 
+               VALUES (:nombre, :apellido, :fecha_nacimiento, :genero, :alias, :foto)";                
                 
                 $paramsPersona = [
                     ':nombre' => $datos['nombre'],
                     ':apellido' => $datos['apellidos'],
                     ':fecha_nacimiento' => $datos['fechaNacimiento'],
                     ':genero' => $genero,
-                    ':alias' => $datos['alias']
+                    ':alias' => $datos['alias'],
+                    ':foto' => $datos['foto'] ?? null  // NUEVO
                 ];
 
                 $idPersona = $this->db->query($sqlPersona, $paramsPersona);

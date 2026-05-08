@@ -1,5 +1,6 @@
 // ========== VARIABLES GLOBALES ==========
 let currentUser = null;
+let fotoSeleccionada = null;
 
 // ========== VERIFICAR SESIÓN AL CARGAR ==========
 document.addEventListener('DOMContentLoaded', async function() {
@@ -36,20 +37,41 @@ function cargarDatosPerfil() {
                      currentUser.rol === 'supervisor' ? 'Supervisor' : 'Asegurado';
     const inicial = (currentUser.nombre || 'U').charAt(0).toUpperCase();
     
+    // Header usuario
     const userNameSpan = document.getElementById('userNameDisplay');
     const userRoleSpan = document.getElementById('userRoleDisplay');
     const userAvatarSpan = document.getElementById('userAvatar');
     
     if (userNameSpan) userNameSpan.textContent = nombreMostrar;
     if (userRoleSpan) userRoleSpan.textContent = rolTexto;
-    if (userAvatarSpan) userAvatarSpan.textContent = inicial;
+    
+    // Avatar del header - con foto o inicial
+    if (userAvatarSpan) {
+        if (currentUser.foto) {
+            userAvatarSpan.innerHTML = `<img src="${currentUser.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+            userAvatarSpan.style.background = 'none';
+        } else {
+            userAvatarSpan.textContent = inicial;
+            userAvatarSpan.style.background = 'linear-gradient(135deg, #ffd700, #ffaa00)';
+        }
+    }
     
     // PERFIL - CABECERA
     const profileAvatar = document.getElementById('profileAvatar');
     const profileName = document.getElementById('profileName');
     const profileAlias = document.getElementById('profileAlias');
     
-    if (profileAvatar) profileAvatar.textContent = inicial;
+    // Avatar del perfil - con foto o inicial
+    if (profileAvatar) {
+        if (currentUser.foto) {
+            profileAvatar.innerHTML = `<img src="${currentUser.foto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+            profileAvatar.style.background = 'none';
+        } else {
+            profileAvatar.textContent = inicial;
+            profileAvatar.style.background = 'linear-gradient(135deg, #ffd700, #ffaa00)';
+        }
+    }
+    
     if (profileName) profileName.textContent = currentUser.nombre || 'Usuario';
     if (profileAlias) profileAlias.textContent = currentUser.alias || '@usuario';
     
@@ -60,30 +82,19 @@ function cargarDatosPerfil() {
     const displayGenero = document.getElementById('displayGenero');
     const displayEmail = document.getElementById('displayEmail');
     const displayAlias = document.getElementById('displayAlias');
-    const lastAccess = document.querySelector('.last-access');
     
     if (displayNombre) displayNombre.textContent = currentUser.nombre || 'No registrado';
     if (displayApellidos) displayApellidos.textContent = currentUser.apellidos || 'No registrado';
     
     if (displayFechaNac) {
         if (currentUser.fecha_nacimiento) {
-            // CORRECCIÓN: Parsear la fecha manualmente para evitar problemas de zona horaria
-            const fechaStr = currentUser.fecha_nacimiento; // Ejemplo: "2004-12-06"
-            
-            // Dividir la fecha en partes
-            const partes = fechaStr.split('-');
+            const partes = currentUser.fecha_nacimiento.split('-');
             const year = parseInt(partes[0]);
-            const month = parseInt(partes[1]) - 1; // Los meses en JS van de 0-11
+            const month = parseInt(partes[1]) - 1;
             const day = parseInt(partes[2]);
-            
-            // Crear fecha local (sin desplazamiento UTC)
             const fecha = new Date(year, month, day);
-            
-            // Formatear como DD/MM/YYYY
             displayFechaNac.textContent = fecha.toLocaleDateString('es-MX', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
+                year: 'numeric', month: '2-digit', day: '2-digit'
             });
         } else {
             displayFechaNac.textContent = 'No registrado';
@@ -91,17 +102,19 @@ function cargarDatosPerfil() {
     }
     
     if (displayGenero) {
-        if (currentUser.genero === 1 || currentUser.genero === '1') {
+        if (currentUser.genero == 1) {
             displayGenero.textContent = 'Masculino';
-        } else if (currentUser.genero === 0 || currentUser.genero === '0') {
+        } else if (currentUser.genero == 0) {
             displayGenero.textContent = 'Femenino';
         } else {
-            displayGenero.textContent = currentUser.genero || 'No registrado';
+            displayGenero.textContent = 'No registrado';
         }
     }
     
     if (displayEmail) displayEmail.textContent = currentUser.email || 'No registrado';
     if (displayAlias) displayAlias.textContent = currentUser.alias || '@usuario';
+    
+    const lastAccess = document.querySelector('.last-access');
     if (lastAccess) lastAccess.textContent = `Último acceso: ${new Date().toLocaleString()}`;
 }
 
@@ -112,11 +125,9 @@ function abrirModalEditarPerfil() {
         return;
     }
     
-    // Llenar el formulario con los datos actuales
     document.getElementById('editNombre').value = currentUser.nombre || '';
     document.getElementById('editApellidos').value = currentUser.apellidos || '';
     
-    // Formatear fecha para el input date
     if (currentUser.fecha_nacimiento) {
         const fechaStr = currentUser.fecha_nacimiento;
         if (fechaStr.includes('-') && fechaStr.length >= 10) {
@@ -130,12 +141,26 @@ function abrirModalEditarPerfil() {
     document.getElementById('editEmail').value = currentUser.email || '';
     document.getElementById('editAlias').value = currentUser.alias || '';
     
-    // Limpiar mensaje anterior
+    // Resetear foto
+    fotoSeleccionada = null;
+    document.getElementById('editFoto').value = '';
+    
+    // Mostrar foto actual si existe
+    if (currentUser.foto) {
+        document.getElementById('fotoPreview').src = currentUser.foto;
+        document.getElementById('fotoPreview').style.display = 'block';
+        document.getElementById('fotoPlaceholder').style.display = 'none';
+        document.getElementById('btnEliminarFoto').style.display = 'inline-block';
+    } else {
+        document.getElementById('fotoPreview').style.display = 'none';
+        document.getElementById('fotoPlaceholder').style.display = 'flex';
+        document.getElementById('btnEliminarFoto').style.display = 'none';
+    }
+    
     const mensaje = document.getElementById('editProfileMessage');
     mensaje.className = 'form-message';
     mensaje.style.display = 'none';
     
-    // Mostrar modal
     document.getElementById('editProfileModal').classList.add('active');
 }
 
@@ -143,13 +168,48 @@ function cerrarModalEditProfile() {
     document.getElementById('editProfileModal').classList.remove('active');
 }
 
-// Cerrar modal al hacer clic fuera del contenido
 document.addEventListener('click', function(event) {
     const modal = document.getElementById('editProfileModal');
-    if (event.target === modal) {
-        cerrarModalEditProfile();
-    }
+    if (event.target === modal) cerrarModalEditProfile();
 });
+
+// ========== FUNCIONES DE FOTO ==========
+function previewFoto(event) {
+    const file = event.target.files[0];
+    if (file) {
+        if (!file.type.startsWith('image/')) {
+            alert('Solo se permiten imágenes');
+            event.target.value = '';
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            alert('La imagen debe ser menor a 2MB');
+            event.target.value = '';
+            return;
+        }
+        
+        fotoSeleccionada = file;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('fotoPreview').src = e.target.result;
+            document.getElementById('fotoPreview').style.display = 'block';
+            document.getElementById('fotoPlaceholder').style.display = 'none';
+            document.getElementById('btnEliminarFoto').style.display = 'inline-block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Quitar la foto actual (ponerla como null)
+function quitarFotoActual() {
+    fotoSeleccionada = 'QUITAR'; // Valor especial para indicar que se quiere quitar
+    document.getElementById('editFoto').value = '';
+    document.getElementById('fotoPreview').style.display = 'none';
+    document.getElementById('fotoPlaceholder').style.display = 'flex';
+    document.getElementById('btnEliminarFoto').style.display = 'none';
+}
+
 
 async function guardarPerfil(event) {
     event.preventDefault();
@@ -157,79 +217,64 @@ async function guardarPerfil(event) {
     const btnSave = document.getElementById('btnSaveProfile');
     const mensajeDiv = document.getElementById('editProfileMessage');
     
-    const datos = {
-        nombre: document.getElementById('editNombre').value.trim(),
-        apellidos: document.getElementById('editApellidos').value.trim(),
-        fecha_nacimiento: document.getElementById('editFechaNac').value,
-        genero: parseInt(document.getElementById('editGenero').value),
-        email: document.getElementById('editEmail').value.trim(),
-        alias: document.getElementById('editAlias').value.trim()
-    };
+    const formData = new FormData();
+    formData.append('nombre', document.getElementById('editNombre').value.trim());
+    formData.append('apellidos', document.getElementById('editApellidos').value.trim());
+    formData.append('fecha_nacimiento', document.getElementById('editFechaNac').value);
+    formData.append('genero', parseInt(document.getElementById('editGenero').value));
+    formData.append('email', document.getElementById('editEmail').value.trim());
+    formData.append('alias', document.getElementById('editAlias').value.trim());
     
-    // Validar campos obligatorios
-    if (!datos.nombre || !datos.apellidos || !datos.fecha_nacimiento || !datos.email) {
+    // Manejar foto
+    if (fotoSeleccionada === 'QUITAR') {
+        // Quiere eliminar la foto
+        formData.append('quitar_foto', '1');
+    } else if (fotoSeleccionada instanceof File) {
+        // Nueva foto seleccionada
+        formData.append('foto', fotoSeleccionada);
+    }
+    // Si fotoSeleccionada es null, no se modifica
+    
+    if (!formData.get('nombre') || !formData.get('apellidos') || !formData.get('fecha_nacimiento') || !formData.get('email')) {
         mostrarMensajeEdicion('❌ Todos los campos con * son obligatorios', 'error');
         return;
     }
     
-    // Validar email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(datos.email)) {
-        mostrarMensajeEdicion('❌ El correo electrónico no es válido', 'error');
-        return;
-    }
-    
-    // Validar fecha
-    const fechaNac = new Date(datos.fecha_nacimiento);
-    const hoy = new Date();
-    if (fechaNac >= hoy) {
-        mostrarMensajeEdicion('❌ La fecha de nacimiento debe ser anterior a hoy', 'error');
-        return;
-    }
-    
-    // Deshabilitar botón y mostrar loading
     btnSave.disabled = true;
     btnSave.innerHTML = '<span>⏳</span> Guardando...';
     
     try {
         const response = await fetch('../api/actualizar_perfil.php', {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(datos)
+            body: formData
         });
         
         const result = await response.json();
         
         if (result.ok) {
-            mostrarMensajeEdicion(result.mensaje, 'success');
+            mostrarMensajeEdicion('✅ ' + result.mensaje, 'success');
             
-            // Actualizar datos en memoria
-            currentUser.nombre = datos.nombre;
-            currentUser.apellidos = datos.apellidos;
-            currentUser.fecha_nacimiento = datos.fecha_nacimiento;
-            currentUser.genero = datos.genero;
-            currentUser.email = datos.email;
-            currentUser.alias = datos.alias || currentUser.alias;
+            currentUser.nombre = formData.get('nombre');
+            currentUser.apellidos = formData.get('apellidos');
+            currentUser.fecha_nacimiento = formData.get('fecha_nacimiento');
+            currentUser.genero = parseInt(formData.get('genero'));
+            currentUser.email = formData.get('email');
+            currentUser.alias = formData.get('alias') || currentUser.alias;
+            if (result.foto !== undefined) currentUser.foto = result.foto;
             
-            // Recargar UI completa
             cargarDatosPerfil();
             
-            // Cerrar modal después de 1.5 segundos
             setTimeout(() => {
                 cerrarModalEditProfile();
                 mensajeDiv.className = 'form-message';
                 mensajeDiv.style.display = 'none';
             }, 1500);
-            
         } else {
             mostrarMensajeEdicion('❌ ' + result.mensaje, 'error');
         }
-        
     } catch (error) {
-        console.error('Error al actualizar perfil:', error);
-        mostrarMensajeEdicion('❌ Error de conexión con el servidor', 'error');
+        console.error('Error:', error);
+        mostrarMensajeEdicion('❌ Error de conexión', 'error');
     } finally {
         btnSave.disabled = false;
         btnSave.innerHTML = '<span>💾</span> Guardar Cambios';
@@ -243,17 +288,13 @@ function mostrarMensajeEdicion(mensaje, tipo) {
     mensajeDiv.className = 'form-message ' + tipo;
 }
 
-// ========== FUNCIONES DE NAVEGACIÓN ==========
+// ========== NAVEGACIÓN ==========
 function irDashboard() {
-    window.location.href = '/BDM_Proyect/Public/views/index.php';
+    window.location.href = '/BDM_Proyect/index.php';
 }
 
 function showNotifications() {
-    alert('📢 Notificaciones: No hay notificaciones nuevas');
-}
-
-function irPerfil() {
-    console.log('Ya en perfil');
+    alert('📢 No hay notificaciones nuevas');
 }
 
 // ========== MODALES ==========
@@ -269,61 +310,30 @@ function cerrarModal(modalId) {
 
 async function cerrarSesion() {
     try {
-        const response = await fetch('/BDM_Proyect/logout.php');
-        const data = await response.json();
-        
-        // Redirigir al login sin importar la respuesta
-        window.location.href = '/BDM_Proyect/Public/views/Login.php';
-        
-    } catch (error) {
-        console.error('Error al cerrar sesión:', error);
-        // Si hay error, igual redirigir
-        window.location.href = '/BDM_Proyect/Public/views/Login.php';
-    }
+        await fetch('/BDM_Proyect/logout.php');
+    } catch (e) {}
+    window.location.href = '/BDM_Proyect/Public/views/Login.php';
 }
 
-// ========== CAMBIAR CONTRASEÑA REAL ==========
+// ========== CAMBIAR CONTRASEÑA ==========
 function cambiarContrasena() {
-    // Abrir el modal de cambio de contraseña
     const modal = document.getElementById('passwordModal');
     if (modal) {
-        // Limpiar campos anteriores
-        const passActual = document.getElementById('passActual');
-        const passNueva = document.getElementById('passNueva');
-        const passConfirmar = document.getElementById('passConfirmar');
-        const mensajeDiv = document.getElementById('passMensaje');
-        
-        if (passActual) passActual.value = '';
-        if (passNueva) passNueva.value = '';
-        if (passConfirmar) passConfirmar.value = '';
-        if (mensajeDiv) mensajeDiv.style.display = 'none';
-        
+        document.getElementById('passActual').value = '';
+        document.getElementById('passNueva').value = '';
+        document.getElementById('passConfirmar').value = '';
+        document.getElementById('passMensaje').style.display = 'none';
         modal.classList.add('active');
-    } else {
-        alert('Funcionalidad en desarrollo');
     }
 }
 
 async function cambiarContrasenaReal() {
-    console.log("cambiarContrasenaReal ejecutándose...");
-    
-    const passActual = document.getElementById('passActual');
-    const passNueva = document.getElementById('passNueva');
-    const passConfirmar = document.getElementById('passConfirmar');
+    const passActual = document.getElementById('passActual').value;
+    const passNueva = document.getElementById('passNueva').value;
+    const passConfirmar = document.getElementById('passConfirmar').value;
     const mensajeDiv = document.getElementById('passMensaje');
     
     if (!passActual || !passNueva || !passConfirmar) {
-        console.error("No se encontraron los campos del formulario");
-        alert("Error: No se encontró el formulario");
-        return;
-    }
-    
-    const passActualVal = passActual.value;
-    const passNuevaVal = passNueva.value;
-    const passConfirmarVal = passConfirmar.value;
-    
-    // Validar campos
-    if (!passActualVal || !passNuevaVal || !passConfirmarVal) {
         mensajeDiv.style.display = 'block';
         mensajeDiv.style.background = '#ffebee';
         mensajeDiv.style.color = '#c62828';
@@ -331,81 +341,49 @@ async function cambiarContrasenaReal() {
         return;
     }
     
-    // Validar longitud nueva contraseña
-    if (passNuevaVal.length < 8) {
+    if (passNueva.length < 8) {
         mensajeDiv.style.display = 'block';
         mensajeDiv.style.background = '#ffebee';
         mensajeDiv.style.color = '#c62828';
-        mensajeDiv.innerHTML = '❌ La nueva contraseña debe tener al menos 8 caracteres';
+        mensajeDiv.innerHTML = '❌ Mínimo 8 caracteres';
         return;
     }
     
-    // Validar que coincidan
-    if (passNuevaVal !== passConfirmarVal) {
+    if (passNueva !== passConfirmar) {
         mensajeDiv.style.display = 'block';
         mensajeDiv.style.background = '#ffebee';
         mensajeDiv.style.color = '#c62828';
-        mensajeDiv.innerHTML = '❌ Las contraseñas nuevas no coinciden';
+        mensajeDiv.innerHTML = '❌ No coinciden';
         return;
     }
-    
-    // Mostrar loading
-    const btn = document.querySelector('#passwordModal .btn-primary');
-    const textoOriginal = btn ? btn.textContent : 'Cambiar Contraseña';
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Procesando...';
-    }
-    mensajeDiv.style.display = 'none';
     
     try {
         const response = await fetch('/BDM_Proyect/Public/api/cambiar_password.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                password_actual: passActualVal,
-                password_nueva: passNuevaVal
+                password_actual: passActual,
+                password_nueva: passNueva
             })
         });
         
         const result = await response.json();
-        
         mensajeDiv.style.display = 'block';
         
         if (result.ok) {
             mensajeDiv.style.background = '#e8f5e8';
             mensajeDiv.style.color = '#2e7d32';
             mensajeDiv.innerHTML = '✅ ' + result.mensaje;
-            
-            // Limpiar campos
-            passActual.value = '';
-            passNueva.value = '';
-            passConfirmar.value = '';
-            
-            // Cerrar modal después de 2 segundos
-            setTimeout(() => {
-                cerrarModal('passwordModal');
-            }, 2000);
+            setTimeout(() => cerrarModal('passwordModal'), 2000);
         } else {
             mensajeDiv.style.background = '#ffebee';
             mensajeDiv.style.color = '#c62828';
             mensajeDiv.innerHTML = '❌ ' + result.mensaje;
         }
-        
     } catch (error) {
-        console.error('Error:', error);
         mensajeDiv.style.display = 'block';
         mensajeDiv.style.background = '#ffebee';
         mensajeDiv.style.color = '#c62828';
-        mensajeDiv.innerHTML = '❌ Error de conexión con el servidor';
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.textContent = textoOriginal;
-        }
+        mensajeDiv.innerHTML = '❌ Error de conexión';
     }
-}
-
-function irDashboard() {
-    window.location.href = '/BDM_PROYECT/index.php';
 }

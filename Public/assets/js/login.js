@@ -197,12 +197,11 @@ function toggleRegisterButton() {
     const password = document.getElementById('regPassword').value;
     const confirmPassword = document.getElementById('regConfirmPassword').value;
     const ageVerified = document.getElementById('ageVerification').checked;
-    const tieneFoto = fotoSeleccionada !== null;
-    
+        
     const allFields = nombre && apellidos && genero && email && alias && 
                      password && confirmPassword && selectedUserType && 
                      isAgeValid && isPasswordValid && isEmailValid && 
-                     ageVerified && tieneFoto;
+                     ageVerified;
     
     const btn = document.getElementById('registerBtn');
     if (btn) btn.disabled = !allFields;
@@ -276,7 +275,6 @@ function toggleRegisterButton() {
 // }
 
 async function handleRegister() {
-
     console.log("Entrando en Registro.");
 
     const btn = document.getElementById('registerBtn');
@@ -284,26 +282,29 @@ async function handleRegister() {
 
     btn.disabled = true;
     btn.textContent = 'Registrando...';
-
-    const userData = {
-        tipoUsuario: selectedUserType,
-        nombre: document.getElementById('regNombre').value.trim(),
-        apellidos: document.getElementById('regApellidos').value.trim(),
-        fechaNacimiento: document.getElementById('regFechaNacimiento').value,
-        genero: document.getElementById('regGenero').value,
-        email: document.getElementById('regEmail').value.trim(),
-        alias: document.getElementById('regAlias').value.trim(),
-        password: document.getElementById('regPassword').value
-    };
+    
+    // Usar FormData para enviar la foto
+    const formData = new FormData();
+    formData.append('tipoUsuario', selectedUserType);
+    formData.append('nombre', document.getElementById('regNombre').value.trim());
+    formData.append('apellidos', document.getElementById('regApellidos').value.trim());
+    formData.append('fechaNacimiento', document.getElementById('regFechaNacimiento').value);
+    formData.append('genero', document.getElementById('regGenero').value);
+    formData.append('email', document.getElementById('regEmail').value.trim());
+    formData.append('alias', document.getElementById('regAlias').value.trim());
+    formData.append('password', document.getElementById('regPassword').value);
+    
+    // Agregar foto si existe
+    if (fotoSeleccionada) {
+        formData.append('foto', fotoSeleccionada);
+    }
 
     try {
-
         console.log("Dentro del Try Catch");
 
-        const response = await fetch('/BDM_PROYECT/Public/api/register.php', {
+        const response = await fetch('/BDM_Proyect/Public/api/register.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData)
+            body: formData  // No usar JSON, usar FormData
         });
 
         const result = await response.json();

@@ -11,7 +11,8 @@ if (isset($_SESSION['usuario'])) {
         'alias' => $_SESSION['usuario']['alias'],
         'email' => $_SESSION['usuario']['email'],
         'fecha_nacimiento' => $_SESSION['usuario']['fecha_nacimiento'] ?? '',
-        'genero' => $_SESSION['usuario']['genero'] ?? ''
+        'genero' => $_SESSION['usuario']['genero'] ?? '',
+        'foto' => $_SESSION['usuario']['foto'] ?? null
     ]);
 } else {
     echo json_encode(['ok' => false]);
