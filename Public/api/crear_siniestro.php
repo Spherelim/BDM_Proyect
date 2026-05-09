@@ -124,6 +124,11 @@ try {
         $unidades, $archivosJson
     ]);
     
+    // Registrar en seguimiento
+$db = new DB();
+$db->query("INSERT INTO seguimiento (id_siniestro, tipo, titulo, descripcion, id_usuario) VALUES (?, 'registro', ?, ?, ?)",
+    [$result['ID_Siniestro'], '📋 Siniestro Registrado', 'Siniestro creado por el ajustador', $ajustador]);
+
     // Notificar al supervisor
 $sql = "SELECT ID_Usuario FROM usuario WHERE id_rol = 2 AND Activo = 1";
 $supervisores = $db->query($sql);

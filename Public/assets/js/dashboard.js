@@ -157,6 +157,36 @@ function mostrarBienvenida() {
     banner.innerHTML = mensaje;
 }
 
+function generarLineaTiempo(seguimiento, cerrado) {
+    if (!seguimiento || seguimiento.length === 0) {
+        return '<div style="text-align:center; padding:2rem; color:#888;">📋 Sin eventos de seguimiento</div>';
+    }
+    
+    return `
+        <div class="timeline">
+            ${seguimiento.map((e, i) => {
+                const esUltimo = i === seguimiento.length - 1;
+                const esCerrado = cerrado && esUltimo;
+                
+                return `
+                <div class="timeline-item ${esCerrado ? 'completed' : (esUltimo ? 'pending' : 'completed')}" 
+                     style="${esCerrado ? 'border-left-color: #f44336;' : ''}">
+                    <div class="timeline-date">${formatFecha(e.Fecha_Creacion)}</div>
+                    <div class="timeline-title">${e.titulo}</div>
+                    <div class="timeline-desc">${e.descripcion || ''}</div>
+                    ${e.Alias ? `<div style="font-size: 0.75rem; color: #888;">Por: ${e.Alias || e.Nombre || 'Sistema'}</div>` : ''}
+                </div>
+                `;
+            }).join('')}
+            ${cerrado ? `
+                <div style="text-align:center; padding:1rem; margin-top:1rem; background:#ffebee; border-radius:12px; color:#c62828;">
+                    🔒 Este siniestro está CERRADO
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
 async function cargarSiniestros() {
     try {
         const container = document.getElementById('siniestrosContainer');
@@ -333,11 +363,15 @@ async function verDetalle(id) {
     content.innerHTML = '<div style="text-align:center; padding:3rem;">⏳ Cargando detalles...</div>';
     modal.classList.add('active');
     
-    const [comentariosData, archivosData, unidadesData] = await Promise.all([
+    const [comentariosData, archivosData, unidadesData, seguimientoData] = await Promise.all([
         fetch(`Public/api/comentarios.php?id=${id}`).then(r => r.json()),
         fetch(`Public/api/archivos_siniestro.php?id=${id}`).then(r => r.json()),
-        fetch(`Public/api/unidades_terceras.php?id_siniestro=${id}`).then(r => r.json())
+        fetch(`Public/api/unidades_terceras.php?id_siniestro=${id}`).then(r => r.json()),
+        fetch(`Public/api/seguimiento.php?id=${id}`).then(r => r.json())
     ]);
+
+    const seguimiento = seguimientoData.ok ? seguimientoData.seguimiento : [];
+    const cerrado = seguimientoData.cerrado || false;
     
     const comentarios = comentariosData.ok ? comentariosData.comentarios : [];
     const archivos = archivosData.ok ? archivosData.archivos : [];
@@ -377,6 +411,12 @@ async function verDetalle(id) {
                 </div>
             </div>
             
+            <!-- Seguimiento -->
+            <div class="detail-section" style="background: #f5f5f5;">
+                <h3>🕐 Seguimiento del Siniestro</h3>
+                ${generarLineaTiempo(seguimiento, cerrado)}
+            </div>
+
             <!-- Unidades Terceras -->
             ${unidades.length > 0 ? `
             <div class="detail-section" style="background: #fff8e1;">
@@ -417,8 +457,8 @@ async function verDetalle(id) {
                     <input type="file" id="nuevosArchivos" multiple accept="image/*,video/*" style="display:none;" onchange="subirArchivosSiniestro(${id})">
                     <button onclick="document.getElementById('nuevosArchivos').click()" style="padding: 0.5rem 1.5rem; background: #2196f3; color: white; border: none; border-radius: 10px; cursor: pointer;">📁 Agregar archivos</button>
                 </div>` : ''}
-            </div>
-            
+            </div>          
+
             <!-- Comentarios -->
             <div class="detail-section" style="background: white; border: 2px solid #e0e0e0;">
                 <h3>💬 Comentarios y Seguimiento</h3>
@@ -432,9 +472,9 @@ async function verDetalle(id) {
             </div>
             
             <!-- Acciones de Supervisor -->
-            ${esSupervisor ? `
+            ${esSupervisor && !cerrado ? `
             <div class="detail-section" style="background: #e8f0fe;">
-                <h3>⚙️ Cambiar Estado del Siniestro</h3>
+                <h3>⚙️ Cambiar Estado</h3>
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                     <button onclick="cambiarEstado('Aceptado')" style="background:#4caf50;color:white;border:none;padding:0.6rem 1rem;border-radius:8px;cursor:pointer;">✓ Aceptado</button>
                     <button onclick="cambiarEstado('Aceptado con pago Deducible')" style="background:#2196f3;color:white;border:none;padding:0.6rem 1rem;border-radius:8px;cursor:pointer;">💵 Con Deducible</button>
