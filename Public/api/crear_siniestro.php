@@ -124,6 +124,14 @@ try {
         $unidades, $archivosJson
     ]);
     
+    // Notificar al supervisor
+$sql = "SELECT ID_Usuario FROM usuario WHERE id_rol = 2 AND Activo = 1";
+$supervisores = $db->query($sql);
+foreach ($supervisores as $sup) {
+    $db->query("INSERT INTO notificacion (id_usuario, tipo, mensaje, id_referencia) VALUES (?, 'siniestro_nuevo', ?, ?)", 
+        [$sup['ID_Usuario'], 'Nuevo siniestro: ' . $nombre, $result['ID_Siniestro'] ?? 0]);
+}
+
     // IMPORTANTE: Mover al siguiente resultset para obtener el resultado
     $stmt->nextRowset();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);

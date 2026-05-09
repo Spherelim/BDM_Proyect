@@ -23,6 +23,10 @@
     <!-- MODAL DE CAMBIO DE CONTRASEÑA -->
     <?php include '../includes/Perfil/Modal_PassChange.php'?>
 
+    <!-- MODAL DE NOTIFICACIONES -->
+    <?php include '../includes/Modal_Notificaciones.php' ?>
+
     <script src="../assets/js/perfil.js"></script>
+    <script src="../assets/js/notificaciones.js"></script>
 </body>
 </html>

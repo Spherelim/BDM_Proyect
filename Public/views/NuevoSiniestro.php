@@ -16,7 +16,11 @@
     <!-- MODAL DE CONFIRMACIÓN -->
     <?php include '../includes/Siniestros/Modal_SinReg.php' ?>
 
+    <!-- MODAL DE NOTIFICACIONES -->
+    <?php include '../includes/Notificaciones/Modal_Notificaciones.php' ?>
+
     <script src="../assets/js/nuevosiniestro.js"></script>
+    <script src="../assets/js/notificaciones.js"></script>
     
 </body>
 </html>

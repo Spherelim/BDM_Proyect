@@ -55,7 +55,7 @@
         }
 
         .notifications::after {
-            content: '3';
+            content: attr(data-count);
             position: absolute;
             top: -8px;
             right: -8px;
@@ -69,6 +69,12 @@
             align-items: center;
             justify-content: center;
             border: 2px solid white;
+        }
+
+        /* Ocultar cuando no hay notificaciones */
+        .notifications:not([data-count])::after,
+        .notifications[data-count="0"]::after {
+            display: none;
         }
 
         .user-info {
