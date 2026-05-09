@@ -488,6 +488,64 @@ async function verDetalle(id) {
     `;
 }
 
+// ========== BUSCADOR DE CLIENTES EN DASHBOARD ==========
+let timeoutBusquedaDashboard = null;
+
+async function buscarClienteEnDashboard() {
+    const termino = document.getElementById('cliente').value.trim();
+    const container = document.getElementById('sugerenciasClienteDashboard');
+    
+    if (timeoutBusquedaDashboard) clearTimeout(timeoutBusquedaDashboard);
+    
+    if (termino.length < 3) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    timeoutBusquedaDashboard = setTimeout(async () => {
+        try {
+            const response = await fetch(`Public/api/buscar_persona.php?q=${encodeURIComponent(termino)}`);
+            const data = await response.json();
+            
+            if (data.ok && data.personas && data.personas.length > 0) {
+                let html = '';
+                data.personas.forEach(persona => {
+                    html += `
+                        <div onclick="seleccionarClienteDashboard('${persona.nombre_completo.replace(/'/g, "\\'")}')" 
+                             style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;"
+                             onmouseover="this.style.background='#e8f0fe'" 
+                             onmouseout="this.style.background='white'">
+                            <div style="font-weight: 600; color: #003366;">👤 ${persona.nombre_completo}</div>
+                            ${persona.Correo ? `<div style="font-size: 0.85rem; color: #666;">📧 ${persona.Correo}</div>` : ''}
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+                container.style.display = 'block';
+            } else {
+                container.innerHTML = '<div style="padding: 15px; text-align: center; color: #888;">✨ No se encontraron coincidencias</div>';
+                container.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }, 400);
+}
+
+function seleccionarClienteDashboard(nombre) {
+    document.getElementById('cliente').value = nombre;
+    document.getElementById('sugerenciasClienteDashboard').style.display = 'none';
+}
+
+// Cerrar sugerencias al hacer clic fuera
+document.addEventListener('click', function(event) {
+    const container = document.getElementById('sugerenciasClienteDashboard');
+    const input = document.getElementById('cliente');
+    if (container && input && event.target !== input && !container.contains(event.target)) {
+        container.style.display = 'none';
+    }
+});
+
 async function subirArchivosSiniestro(idSiniestro) {
     const files = document.getElementById('nuevosArchivos').files;
     if (!files.length) return;

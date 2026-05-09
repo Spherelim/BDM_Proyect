@@ -76,6 +76,24 @@
             display: none;
         }
 
+        #sugerenciasClienteDashboard {
+    animation: fadeIn 0.2s ease;
+}
+
+#sugerenciasClienteDashboard::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sugerenciasClienteDashboard::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#sugerenciasClienteDashboard::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
         .user-info {
             display: flex;
             align-items: center;

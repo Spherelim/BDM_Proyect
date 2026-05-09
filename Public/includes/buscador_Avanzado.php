@@ -36,7 +36,10 @@
 
         <div class="search-field">
             <label>Cliente</label>
-            <input type="text" id="cliente" placeholder="Nombre del cliente">
+            <div style="position: relative;">
+                <input type="text" id="cliente" placeholder="Nombre del cliente" autocomplete="off" oninput="buscarClienteEnDashboard()">
+                <div id="sugerenciasClienteDashboard" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #e0e0e0; border-radius: 12px; max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 5px 15px rgba(0,0,0,0.1);"></div>
+            </div>
         </div>
 
         <div class="search-field">
