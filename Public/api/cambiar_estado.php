@@ -11,9 +11,8 @@ if (!isset($_SESSION['usuario'])) {
 
 $usuario = $_SESSION['usuario'];
 
-// Solo supervisor puede cambiar estados
 if ($usuario['rol'] !== 'supervisor') {
-    echo json_encode(['ok' => false, 'mensaje' => 'Solo los supervisores pueden cambiar estados']);
+    echo json_encode(['ok' => false, 'mensaje' => 'Solo supervisores pueden cambiar estados']);
     exit;
 }
 
@@ -24,25 +23,19 @@ if (!$data || empty($data['id_siniestro']) || empty($data['estado'])) {
     exit;
 }
 
-// Mapear estados
-$estados = [
-    'aceptado' => 'Aceptado',
-    'rechazado' => 'Rechazado',
-    'aceptado_con_deducible' => 'Aceptado con pago Deducible',
-    'aceptado_sin_deducible' => 'Aceptado sin pago Deducible',
-    'reparacion' => 'Aplica pago para reparación',
-    'perdida_total' => 'Pérdida Total'
-];
-
-$estadoFinal = $estados[$data['estado']] ?? $data['estado'];
-
 $db = new DB();
 
-$sql = "UPDATE siniestro SET Estado = :estado WHERE ID_Siniestro = :id";
-$db->execute($sql, [
-    ':estado' => $estadoFinal,
-    ':id' => $data['id_siniestro']
-]);
+$sql = "UPDATE siniestro SET Estado = ? WHERE ID_Siniestro = ?";
+$db->query($sql, [$data['estado'], $data['id_siniestro']]);
+
+// Después de cambiar estado
+// Notificar al ajustador
+$sql = "SELECT id_Ajustador FROM siniestro WHERE ID_Siniestro = ?";
+$sin = $db->getRow($sql, [$data['id_siniestro']]);
+if ($sin) {
+    $db->query("INSERT INTO notificacion (id_usuario, tipo, mensaje, id_referencia) VALUES (?, 'cambio_estado', ?, ?)",
+        [$sin['id_Ajustador'], 'Estado actualizado: ' . $data['estado'], $data['id_siniestro']]);
+}
 
 echo json_encode(['ok' => true, 'mensaje' => 'Estado actualizado']);
 ?>

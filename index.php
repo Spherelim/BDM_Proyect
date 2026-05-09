@@ -17,8 +17,12 @@
     <!-- MODAL DE DETALLE DE SINIESTRO -->
     <?php include 'Public/includes/Modal_Siniestro.php' ?>
 
+    <!-- MODAL DE NOTIFICACIONES -->
+    <?php include 'Public/includes/Modal_Notificaciones.php' ?>
+
     <!-- script con la funciones -->
     <script src="Public/assets/js/dashboard.js"></script>
+    <script src="Public/assets/js/notificaciones.js"></script>
     
 </body>
 </html>
